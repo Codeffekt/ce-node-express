@@ -1,0 +1,1 @@
+## [0.0.25] - Support for old token version with login instead of uid
