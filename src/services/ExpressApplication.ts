@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
+import * as dotenv from "dotenv";
 import * as cookieParser from "cookie-parser";
 import * as compression from "compression";
 import * as winston from 'winston';
@@ -28,6 +29,46 @@ export class ExpressApplication {
 
     constructor(
     ) {
+    }
+
+    async runAppFromEnv(appName: string, options?: Partial<ExpressApplicationConfig>) {
+        dotenv.config({ path: process.env.ENV_SCRIPT || "dist/.env.config" });
+        const app = await this.createApp({
+            pgConfig: {
+                host: process.env.PGHOST,
+                user: process.env.PGUSER,
+                password: process.env.PGPASSWD,
+                database: process.env.PGDB,
+                port: parseInt(process.env.PGPORT!)
+            },
+            authConfig: {
+                env: process.env,
+                secret: process.env.JWT_SECRET!,
+                sub: process.env.JWT_AUD!,
+                aud: process.env.JWT_SUB!,
+                tokenProvider: process.env.JWT_FORMAT || "default",
+                uidFieldName: process.env.JWT_UID_FIELD,
+                jwtExpiration: parseInt(process.env.JWT_EXPIRATION),
+                jwtRefreshExpiration: parseInt(process.env.JWT_REFRESH_EXPIRATION),
+            },
+            corsConfig: {
+                origin: ['http://localhost:4200', 'http://localhost:4201', 'http://localhost:4202'],
+                optionsSuccessStatus: 200,
+                credentials: true
+
+            },
+            routers: [],
+            ...options,
+        });
+
+        const port = process.env.PORT || 3000;
+        const version = process.env.VERSION || "unknown";
+
+        app.listen({ port: port }, () => {
+            console.log(`🚀 ${appName} version ${version} ready at http://localhost:${port}`);
+        });
+
+        return app;
     }
 
     async createApp(config: ExpressApplicationConfig) {
