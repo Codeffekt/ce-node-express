@@ -1,6 +1,12 @@
 import { AccountSettings } from "@codeffekt/ce-core-data";
 import { Inject, Service } from "../core/CeService";
-import { DB_TABLE_ACCOUNTS, DB_TABLE_ASSETS, DB_TABLE_FORMS, DB_TABLE_FORMSROOT, DB_TABLE_FORMS_ADMIN, DB_TABLE_FORMS_ASSOC, DB_TABLE_FORMS_EVENT, DB_TABLE_FORMS_TOKEN, DB_TABLE_FORMS_VERSION, DB_TABLE_PROJECTS } from "../core/Db";
+import {
+    DB_TABLE_ACCOUNTS, DB_TABLE_ASSETS,
+    DB_TABLE_FORMS, DB_TABLE_FORMSROOT,
+    DB_TABLE_FORMS_ADMIN, DB_TABLE_FORMS_ASSOC,
+    DB_TABLE_FORMS_EVENT, DB_TABLE_FORMS_TOKEN,
+    DB_TABLE_FORMS_VERSION, DB_TABLE_PROJECTS
+} from "../core/Db";
 import { DatabaseServer } from "../servers/DatabaseServer";
 import { AuthService } from "./AuthService";
 import { ContextService } from "./ContextService";
@@ -11,18 +17,29 @@ export interface DbConfigConfig {
     password: string;
 }
 
-/* export interface PgTableSchema {
-    table_schema: string;
-    table_name: string;    
-} */
+export interface InitTableUserConfig {
+    login: string;
+    passwd: string;
+    account: string;
+}
 
-const SUPER_ADMIN_LOGIN = "admin";
-const SUPER_ADMIN_PASSWD = "admin";
-const SUPER_ADMIN_ACCOUNT = "admin";
+export interface InitTableConfig {
+    superAdmin: InitTableUserConfig;
+    defaultAccount: InitTableUserConfig;
+}
 
-const DEFAULT_ADMIN_LOGIN = "admin-default";
-const DEFAULT_ADMIN_PASSWD = "admin";
-const DEFAULT_ADMIN_ACCOUNT = "default";
+const INIT_TABLE_CONFIG: InitTableConfig = {
+    superAdmin: {
+        login: "admin",
+        passwd: "admin",
+        account: "admin"
+    },
+    defaultAccount: {
+        login: "admin-default",
+        passwd: "admin",
+        account: "dedault"
+    }
+};
 
 @Service()
 export class DbConfigService {
@@ -66,7 +83,7 @@ export class DbConfigService {
         await this.grantUserPrivileges(this.config.userName, this.config.dbName);
     }
 
-    async initTables() {
+    async initTables(config: InitTableConfig = INIT_TABLE_CONFIG) {
         await this.createUpdateNotifyFunc();
         await this.createMergeRecursiveFunc();
         await this.createTableAccounts();
@@ -79,8 +96,8 @@ export class DbConfigService {
         await this.createTableFormsToken();
         await this.createTableFormsEvent();
         await this.createTableProjects();
-        await this.insertSuperAdminUser();
-        await this.insertDefaultAccount();
+        await this.insertSuperAdminUser(config);
+        await this.insertDefaultAccount(config);
     }
 
     async clearDatabase() {
@@ -178,7 +195,7 @@ export class DbConfigService {
         }
 
         await this.doTransaction([
-            ...this.getCreateFormTableTransaction(tableName),            
+            ...this.getCreateFormTableTransaction(tableName),
             `create index ${tableName}_root on ${tableName} using btree((data->>'root'))`,
             `create index ${tableName}_ctime on ${tableName} using btree((data->>'ctime'))`
         ]);
@@ -192,7 +209,7 @@ export class DbConfigService {
 
     private async createTableFormsAdmin() {
         const isCreated = await this.createTableFormsFromName(DB_TABLE_FORMS_ADMIN);
-        if(isCreated) {
+        if (isCreated) {
             await this.createTriggers(DB_TABLE_FORMS_ADMIN);
         }
     }
@@ -307,20 +324,22 @@ export class DbConfigService {
         await this.db.poolProject.query(query);
     }
 
-    private async insertSuperAdminUser() {
+    private async insertSuperAdminUser(config: InitTableConfig) {
 
-        const res = await this.db.poolProject.query(`select * from ${DB_TABLE_ACCOUNTS} where data->>'account'='${SUPER_ADMIN_ACCOUNT}'`);
+        const superAdminConfig = config.superAdmin;
+
+        const res = await this.db.poolProject.query(`select * from ${DB_TABLE_ACCOUNTS} where data->>'account'='${superAdminConfig.account}'`);
         if (res.rowCount > 0) {
             return;
         }
 
-        const hashPasswd = await AuthService.createHash(SUPER_ADMIN_PASSWD);
+        const hashPasswd = await AuthService.createHash(superAdminConfig.passwd);
 
         const superAdmin: AccountSettings = {
             ...this.context.createCore(),
             key: this.context.createUnique(),
-            account: SUPER_ADMIN_ACCOUNT,
-            login: SUPER_ADMIN_LOGIN,
+            account: superAdminConfig.account,
+            login: superAdminConfig.login,
             passwd: hashPasswd,
             firstName: undefined,
             lastName: undefined,
@@ -333,21 +352,24 @@ export class DbConfigService {
         await this.db.poolProject.query(`insert into ${DB_TABLE_ACCOUNTS}(data) values ('${JSON.stringify(superAdmin)}')`);
     }
 
-    private async insertDefaultAccount() {
-        const res = await this.db.poolProject.query(`select * from ${DB_TABLE_ACCOUNTS} where data->>'account'='${DEFAULT_ADMIN_ACCOUNT}'`);
+    private async insertDefaultAccount(config: InitTableConfig) {
+
+        const defaultAdminConfig = config.defaultAccount;
+
+        const res = await this.db.poolProject.query(`select * from ${DB_TABLE_ACCOUNTS} where data->>'account'='${defaultAdminConfig.account}'`);
         if (res.rowCount > 0) {
             return;
         }
 
-        const superAdmin = await this.getSuperAdminAccount();
+        const superAdmin = await this.getSuperAdminAccount(config);
 
-        const hashPasswd = await AuthService.createHash(DEFAULT_ADMIN_PASSWD);
+        const hashPasswd = await AuthService.createHash(defaultAdminConfig.passwd);
 
         const defaultAdmin: AccountSettings = {
             ...this.context.createCore(),
             key: superAdmin.key,
-            account: DEFAULT_ADMIN_ACCOUNT,
-            login: DEFAULT_ADMIN_LOGIN,
+            account: defaultAdminConfig.account,
+            login: defaultAdminConfig.login,
             passwd: hashPasswd,
             firstName: undefined,
             lastName: undefined,
@@ -360,8 +382,8 @@ export class DbConfigService {
         await this.db.poolProject.query(`insert into ${DB_TABLE_ACCOUNTS}(data) values ('${JSON.stringify(defaultAdmin)}')`);
     }
 
-    private async getSuperAdminAccount() {
-        const res = await this.db.poolProject.query(`select data from ${DB_TABLE_ACCOUNTS} where data->>'account'='${SUPER_ADMIN_ACCOUNT}'`);
+    private async getSuperAdminAccount(config: InitTableConfig) {
+        const res = await this.db.poolProject.query(`select data from ${DB_TABLE_ACCOUNTS} where data->>'account'='${config.superAdmin.account}'`);
         if (res.rowCount === 0) {
             throw new Error(`SuperAdmin account not found !`);
         }
