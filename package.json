@@ -1,6 +1,6 @@
 {
   "name": "@codeffekt/ce-node-express",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "CeForms backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
