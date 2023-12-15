@@ -1,9 +1,11 @@
-import { AccountSettings } from "@codeffekt/ce-core-data";
+import { AccountSettings, FormRoot } from "@codeffekt/ce-core-data";
 import { Inject, Service } from "../core/CeService";
 import { AccountsService } from "./AccountsService";
 import { AuthService } from "./AuthService";
 import { ContextService } from "./ContextService";
 import { DbConfigService } from "./DbConfigService";
+import { FormsService } from "./FormsService";
+import { Roots } from "../core";
 
 export interface InitUserConfig {
     login: string;
@@ -11,17 +13,11 @@ export interface InitUserConfig {
     account: string;
 }
 
-export interface InitConfig {
-    superAdmin: InitUserConfig;
+export interface InitConfig {    
     defaultAccount: InitUserConfig;
 }
 
-const INIT_CONFIG: InitConfig = {
-    superAdmin: {
-        login: "admin",
-        passwd: "admin",
-        account: "admin"
-    },
+const INIT_CONFIG: InitConfig = {   
     defaultAccount: {
         login: "admin-default",
         passwd: "admin",
@@ -41,41 +37,30 @@ export class CeFormsInitService {
     @Inject(AccountsService)
     private readonly accountsService: AccountsService;
 
+    @Inject(FormsService)
+    private readonly formsService: FormsService;
+
     constructor() { }
 
     async init(config: InitConfig = INIT_CONFIG) {
         await this.dbConfigService.initTables();
-        await this.dbConfigService.clearTables();
-        await this.insertSuperAdminUser(config);
-        await this.insertDefaultAccount(config);
+        await this.dbConfigService.clearTables();  
+        await this.insertFormsRoot();
+        await this.insertDefaultAccount(config);        
+    }    
+
+    private async insertFormsRoot() {
+        const roots = Roots.forms.map<FormRoot>(root => ({
+            ...root,
+            ctime: Date.now()
+        }));
+
+        for(const root of roots) {
+            await this.formsService.upsertFormRoot(root);
+        }
     }
 
-    private async insertSuperAdminUser(config: InitConfig) {
-
-        const superAdminConfig = config.superAdmin;        
-
-        const hashPasswd = await AuthService.createHash(superAdminConfig.passwd);
-
-        const superAdmin: AccountSettings = {
-            ...this.context.createCore(),
-            key: this.context.createUnique(),
-            account: superAdminConfig.account,
-            login: superAdminConfig.login,
-            passwd: hashPasswd,
-            firstName: undefined,
-            lastName: undefined,
-            email: undefined,
-            lang: undefined,
-            role: "admin",
-            projects: []
-        };
-
-        await this.accountsService.addAccount(superAdmin);
-    }
-
-    private async insertDefaultAccount(config: InitConfig) {
-        
-        const superAdmin = await this.accountsService.getAccountFromLogin(config.superAdmin.login);
+    private async insertDefaultAccount(config: InitConfig) {            
 
         const defaultAdminConfig = config.defaultAccount;        
 
@@ -83,7 +68,7 @@ export class CeFormsInitService {
 
         const defaultAdmin: AccountSettings = {
             ...this.context.createCore(),
-            key: superAdmin.key,
+            key: this.context.createUnique(),
             account: defaultAdminConfig.account,
             login: defaultAdminConfig.login,
             passwd: hashPasswd,
