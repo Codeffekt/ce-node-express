@@ -7,3 +7,5 @@
 ## [1.9.3] - Create a ce-forms init service to manage ce-forms initialisation
 
 ## [1.9.4] - Remove super admin init, add default forms root in init
+
+## [1.9.5] - Add missing forms root forms-mask, forms-style, forms-app, forms-export
