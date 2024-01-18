@@ -90,7 +90,8 @@ export class Roots {
                 "_assets": {
                     "type": "assetArray",
                     "field": "_assets",
-                    "label": "Media"
+                    "label": "Media",
+                    "value": "assets-{$id}"
                 },
                 "params": {
                     "type": "object",
@@ -106,6 +107,45 @@ export class Roots {
                     "type": "text",
                     "field": "account",
                     "label": "Compte"
+                }
+            }
+        },
+        {
+            "id": "forms-project-template",
+            "ctime": 1639560491556,
+            "mtime": 1665416455851,
+            "title": "Modèle de projet",
+            "content": {
+                "name": {
+                    "type": "text",
+                    "field": "name",
+                    "label": "Name"
+                },
+                "type": {
+                    "type": "text",
+                    "field": "type",
+                    "label": "Type"
+                },
+                "_assets": {
+                    "type": "assetArray",
+                    "field": "_assets",
+                    "label": "Media",
+                    "value": "assets-{$id}"
+                },
+                "account": {
+                    "type": "text",
+                    "field": "account",
+                    "label": "Compte"
+                },
+                "status": {
+                    "type": "text",
+                    "field": "status",
+                    "label": "Status"
+                },
+                "params": {
+                    "type": "object",
+                    "field": "params",
+                    "label": "Params"
                 }
             }
         },
@@ -190,142 +230,142 @@ export class Roots {
             "mtime": 1665653692841,
             "title": "Mask",
             "content": {
-              "mask": {
-                "type": "mask",
-                "field": "mask",
-                "label": "Mask"
-              },
-              "root": {
-                "type": "index",
-                "field": "root",
-                "label": "Root"
-              },
-              "style": {
-                "type": "style",
-                "field": "style",
-                "label": "Style"
-              },
-              "category": {
-                "type": "index",
-                "field": "category",
-                "label": "Category"
-              },
-              "disabled": {
-                "type": "boolean",
-                "field": "disabled",
-                "label": "Disabled"
-              }
+                "mask": {
+                    "type": "mask",
+                    "field": "mask",
+                    "label": "Mask"
+                },
+                "root": {
+                    "type": "index",
+                    "field": "root",
+                    "label": "Root"
+                },
+                "style": {
+                    "type": "style",
+                    "field": "style",
+                    "label": "Style"
+                },
+                "category": {
+                    "type": "index",
+                    "field": "category",
+                    "label": "Category"
+                },
+                "disabled": {
+                    "type": "boolean",
+                    "field": "disabled",
+                    "label": "Disabled"
+                }
             }
-          },
-          {
+        },
+        {
             "id": "forms-style",
             "ctime": 1620049568340,
             "title": "Style",
             "content": {
-              "root": {
-                "type": "index",
-                "field": "root",
-                "label": "Root"
-              },
-              "style": {
-                "type": "style",
-                "field": "style",
-                "label": "Style"
-              },
-              "category": {
-                "type": "index",
-                "field": "category",
-                "label": "Category"
-              },
-              "disabled": {
-                "type": "boolean",
-                "field": "disabled",
-                "label": "Disabled"
-              }
+                "root": {
+                    "type": "index",
+                    "field": "root",
+                    "label": "Root"
+                },
+                "style": {
+                    "type": "style",
+                    "field": "style",
+                    "label": "Style"
+                },
+                "category": {
+                    "type": "index",
+                    "field": "category",
+                    "label": "Category"
+                },
+                "disabled": {
+                    "type": "boolean",
+                    "field": "disabled",
+                    "label": "Disabled"
+                }
             }
-          },
-          {
+        },
+        {
             "id": "forms-app",
             "ctime": 1639560491556,
             "mtime": 1665653546119,
             "title": "Application",
             "content": {
-              "name": {
-                "type": "text",
-                "field": "name",
-                "label": "Name"
-              },
-              "type": {
-                "type": "text",
-                "field": "type",
-                "label": "Type"
-              },
-              "masks": {
-                "root": "forms-mask",
-                "type": "formAssoc",
-                "field": "masks",
-                "label": "Masques",
-                "params": {
-                  "fields": [
-                    "root",
-                    "category"
-                  ]
+                "name": {
+                    "type": "text",
+                    "field": "name",
+                    "label": "Name"
+                },
+                "type": {
+                    "type": "text",
+                    "field": "type",
+                    "label": "Type"
+                },
+                "masks": {
+                    "root": "forms-mask",
+                    "type": "formAssoc",
+                    "field": "masks",
+                    "label": "Masques",
+                    "params": {
+                        "fields": [
+                            "root",
+                            "category"
+                        ]
+                    }
+                },
+                "title": {
+                    "type": "text",
+                    "field": "title",
+                    "label": "Title"
+                },
+                "styles": {
+                    "root": "forms-style",
+                    "type": "formAssoc",
+                    "field": "styles",
+                    "label": "Styles",
+                    "params": {
+                        "fields": [
+                            "root",
+                            "category"
+                        ]
+                    }
+                },
+                "category": {
+                    "type": "text",
+                    "field": "category",
+                    "label": "Category"
+                },
+                "description": {
+                    "type": "text",
+                    "field": "description",
+                    "label": "Description"
                 }
-              },
-              "title": {
-                "type": "text",
-                "field": "title",
-                "label": "Title"
-              },
-              "styles": {
-                "root": "forms-style",
-                "type": "formAssoc",
-                "field": "styles",
-                "label": "Styles",
-                "params": {
-                  "fields": [
-                    "root",
-                    "category"
-                  ]
-                }
-              },
-              "category": {
-                "type": "text",
-                "field": "category",
-                "label": "Category"
-              },
-              "description": {
-                "type": "text",
-                "field": "description",
-                "label": "Description"
-              }
             }
-          },
-          {
+        },
+        {
             "id": "forms-export",
             "ctime": 1641285670088,
             "mtime": 1641399335789,
             "title": "Formulaire Export",
             "content": {
-              "cols": {
-                "type": "object",
-                "field": "cols",
-                "label": "Cols",
-                "defaultValue": []
-              },
-              "name": {
-                "type": "text",
-                "field": "name",
-                "label": "Nom"
-              },
-              "rowsQuery": {
-                "type": "object",
-                "field": "rowsQuery",
-                "label": "RowsQuery",
-                "defaultValue": {}
-              }
+                "cols": {
+                    "type": "object",
+                    "field": "cols",
+                    "label": "Cols",
+                    "defaultValue": []
+                },
+                "name": {
+                    "type": "text",
+                    "field": "name",
+                    "label": "Nom"
+                },
+                "rowsQuery": {
+                    "type": "object",
+                    "field": "rowsQuery",
+                    "label": "RowsQuery",
+                    "defaultValue": {}
+                }
             }
-          }
+        }
     ];
 
 }

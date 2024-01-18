@@ -9,3 +9,5 @@
 ## [1.9.4] - Remove super admin init, add default forms root in init
 
 ## [1.9.5] - Add missing forms root forms-mask, forms-style, forms-app, forms-export
+
+## [1.9.6] - Use rootField in form mutation to retrieve root element within a form block

@@ -1,7 +1,12 @@
 import { FormCreateFacade } from "./FormCreateFacade";
 import { FormDeleteFacade } from "./FormDeleteFacade";
 import { FormArrayCreateFacade } from "./FormArrayCreateFacade";
-import { FormInstanceBase, IndexType, FormMutate, InvalidParamError, EltNotFoundError, IncorrectFormatError, FormInstance, FormWrapper } from "@codeffekt/ce-core-data";
+import {
+    FormInstanceBase, IndexType,
+    FormMutate, InvalidParamError,
+    EltNotFoundError, IncorrectFormatError,
+    FormInstance, FormWrapper, getProjectCreator
+} from "@codeffekt/ce-core-data";
 import { FormForkFacade } from "./FormForkFacade";
 import { FormAssocDelete } from "./FormAssocDelete";
 import { FormAssocAdd } from "./FormAssocAdd";
@@ -13,9 +18,10 @@ import { FormUpdateFacade } from "./FormUpdateFacade";
 export class FormMutateFacade {
 
     @Inject(FormsService)
-    private readonly formsService: FormsService;
+    private readonly formsService: FormsService;    
 
     private root: FormInstanceBase;
+    private creatorId: IndexType;
 
     constructor(private pid: IndexType, private mutation: FormMutate) {
 
@@ -76,7 +82,7 @@ export class FormMutateFacade {
                 }
             }) : [];
         const formBuilder = new FormCreateFacade(actors);
-        return formBuilder.create(this.pid, this.root.table, this.mutation.author);
+        return formBuilder.create(this.pid, this.creatorId, this.mutation.author);
     }
 
     private async executeFormDelete() {
@@ -86,7 +92,7 @@ export class FormMutateFacade {
         await this.createRoot();
 
         const formDelete = new FormDeleteFacade(this.mutation.fields?.includes, this.mutation.fields?.excludes);
-        return formDelete.execute(this.pid, this.root.table, this.mutation.indices[0]);
+        return formDelete.execute(this.pid, this.creatorId, this.mutation.indices[0]);
     }
 
     private async executeFormArrayCreation() {
@@ -98,7 +104,7 @@ export class FormMutateFacade {
     }
 
     private async executeFormUpdate() {
-        this.checkElts();        
+        this.checkElts();
         const updater = new FormUpdateFacade();
         return updater.executeFromForms(this.mutation.elts, this.mutation.author);
     }
@@ -109,9 +115,10 @@ export class FormMutateFacade {
         await this.createRoot();
         const formFork = new FormForkFacade(this.mutation.fields?.includes, this.mutation.fields?.excludes);
         return formFork.create({
-            pid: this.pid, 
-            fid: this.mutation.indices[0], 
-            creatorId: this.root.table });
+            pid: this.pid,
+            fid: this.mutation.indices[0],
+            creatorId: this.creatorId
+        });
     }
 
     private async executeFormUpgrade() {
@@ -122,14 +129,14 @@ export class FormMutateFacade {
     }
 
     private async executeFormAssocAdd() {
-        this.checkIndices();    
+        this.checkIndices();
         this.checkRefField();
         const op = new FormAssocAdd();
         return op.add(this.mutation.ref, this.mutation.indices, this.mutation.formArrayField);
     }
 
     private async executeFormAssocDelete() {
-        this.checkIndices();    
+        this.checkIndices();
         this.checkRefField();
         const op = new FormAssocDelete();
         return op.delete(this.mutation.ref, this.mutation.indices, this.mutation.formArrayField);
@@ -168,6 +175,14 @@ export class FormMutateFacade {
     }
 
     private async createRoot(options: { checkTable: boolean } = { checkTable: true }) {
+        if(this.mutation.rootField) {
+            await this.createRootWithRootField();
+        } else {
+            await this.createRootWithTable(options);
+        }
+    }
+
+    private async createRootWithTable(options: { checkTable: boolean } = { checkTable: true }) {
         if (!this.mutation.root) {
             throw new InvalidParamError(`Mutation does not have a root id`);
         }
@@ -181,6 +196,30 @@ export class FormMutateFacade {
         if (this.pid && options.checkTable && !this.root.table) {
             throw new IncorrectFormatError(`Root ${this.root} does not have a table reference`);
         }
+
+        this.creatorId = this.root.table;
+    }
+
+    private async createRootWithRootField() {
+        if (!this.mutation.rootField) {
+            throw new InvalidParamError(`Mutation does not have a creator Id`);
+        }
+
+        const project = await this.formsService.getForm(this.pid);
+
+        if(!project) {
+            throw new EltNotFoundError(`Form (project) ${this.pid} not found`, this.pid);
+        }
+
+        const creator = getProjectCreator(project, this.mutation.rootField);
+
+        this.root = await this.formsService.getFormRoot(creator.root);
+
+        if (!this.root) {
+            throw new EltNotFoundError(`Form root ${creator.root} not found`, creator);
+        }
+
+        this.creatorId = this.mutation.rootField;
     }
 
     private async createRootMutationFromIndices() {

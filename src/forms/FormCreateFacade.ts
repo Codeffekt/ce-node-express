@@ -38,9 +38,12 @@ export class FormCreateFacade {
             throw new EltNotFoundError(`This template has no form field`, { template });
         }
         const builder = new FormTemplateBuilder();
-        const formInstance = builder.fromForm(srcForm, partialContent, author);
+        const formInstance = builder.fromForm(srcForm, partialContent, author);        
+
+        this.applyRootFromTemplate(formTemplate, formInstance);
+
         return this.formsService.insertForm(formInstance, author);
-    }
+    }    
 
     async createFromRoot(root: IndexType, partialContent: any, author: IndexType): Promise<FormInstance> {
         const formRoot = await this.formsService.getFormRoot(root);
@@ -167,6 +170,13 @@ export class FormCreateFacade {
         const block = FormUtils.getBlockFromField(subForm, field);
         if (FormUtils.isBlockIndex(block)) {
             FormWrapper.setFormValue(field, parentIndex, subForm);
+        }
+    }
+
+    private applyRootFromTemplate(formTemplate: FormInstance, formInstance: FormInstance) {
+        const newRoot = FormWrapper.getFormValue("root", formTemplate);
+        if(newRoot) {
+            formInstance.root = newRoot;
         }
     }
 }
