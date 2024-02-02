@@ -12,8 +12,10 @@ import { PoolConfig } from "pg";
 import { DatabaseServer } from "../servers/DatabaseServer";
 import { AuthService, AuthServiceConfig } from './AuthService';
 import { CeService, Service } from "../core/CeService";
+import { ContextService } from "./ContextService";
 
 export interface ExpressApplicationConfig {
+    contextRoot: string;
     authConfig: AuthServiceConfig;
     pgConfig: PoolConfig;
     corsConfig?: any;
@@ -34,6 +36,7 @@ export class ExpressApplication {
     async runAppFromEnv(appName: string, options?: Partial<ExpressApplicationConfig>) {
         dotenv.config({ path: process.env.ENV_SCRIPT || "dist/.env.config" });
         const app = await this.createApp({
+            contextRoot: process.env.CONTEXT_ROOT || "data/",
             pgConfig: {
                 host: process.env.PGHOST,
                 user: process.env.PGUSER,
@@ -74,6 +77,8 @@ export class ExpressApplication {
     async createApp(config: ExpressApplicationConfig) {
 
         this.config = config;
+
+        CeService.get(ContextService).setRoot(config.contextRoot);
 
         await CeService.get(DatabaseServer).setConfig(config.pgConfig);
         CeService.get(AuthService).setConfig(config.authConfig);
