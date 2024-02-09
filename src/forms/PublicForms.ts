@@ -43,15 +43,7 @@ export class PublicForms {
   async create(@CeApiAccountId id: IndexType, root: IndexType, partialContent?: any) {
     const creator = new FormCreateFacade();
     return creator.createFromRoot(root, partialContent, id);    
-  }
-
-  @CeApiCall
-  @CeApiRole(ROLE_CREATE)
-  @CeApiBinds
-  async createFromTemplate(@CeApiAccountId id: IndexType, template: IndexType, partialContent?: any) {
-    const creator = new FormCreateFacade();
-    return creator.createFromTemplate(template, partialContent, id);    
-  }
+  }  
 
   @CeApiCall
   @CeApiRole(ROLE_CREATE)

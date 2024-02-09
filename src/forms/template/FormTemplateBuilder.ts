@@ -1,7 +1,8 @@
 import { 
     FormInstance, FormUtils, 
     FormWrapper, FORM_BLOCK_TYPE_ASSET_ARRAY, FORM_BLOCK_TYPE_FORM_ARRAY, 
-    FORM_BLOCK_TYPE_FORM_ASSOC } from "@codeffekt/ce-core-data";
+    FORM_BLOCK_TYPE_FORM_ASSOC, 
+    FormRoot} from "@codeffekt/ce-core-data";
 import { Inject } from "../../core/CeService";
 import { FormsService } from "../../services/FormsService";
 
@@ -13,14 +14,18 @@ export class FormTemplateBuilder {
     constructor() {}
 
     fromForm(srcForm: FormInstance, partialContent: any, author: string) {
+        const formInstance = this.fromFormRoot(srcForm, partialContent, author);        
+        formInstance.root = srcForm.root;
+        return formInstance;
+    }
+
+    fromFormRoot(srcForm: FormRoot, partialContent: any, author: string) {
         const formInstance = this.formsService.createForm(srcForm, author);
         if (partialContent) {
             const formWrapper = new FormWrapper({}, formInstance);
             formWrapper.updateProps(partialContent);
             formWrapper.fill();
-        }        
-
-        formInstance.root = srcForm.root;
+        }                
 
         this.replaceFormArrayRefs(formInstance);
         this.replaceFormAssetValues(formInstance);

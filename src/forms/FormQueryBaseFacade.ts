@@ -19,7 +19,7 @@ export abstract class FormsQueryBaseFacade {
     protected readonly formsService: FormsService;
 
     protected project: FormInstance;
-    protected creator: FormBlock;
+    protected creator?: FormBlock;
     protected root: FormInstanceBase;
 
     constructor(protected pid: IndexType, protected query: FormQuery, protected creatorId?: IndexType) { }
@@ -30,7 +30,7 @@ export abstract class FormsQueryBaseFacade {
 
     protected async createRootFromMutation() {
         this.root = await this.formsService.getFormRoot(this.query.root);
-        this.creator = getProjectCreator(this.project, this.root.table);
+        this.creator = this.root.table ? getProjectCreator(this.project, this.root.table) : undefined;
     }
 
     protected async createRootFromCreatorId() {

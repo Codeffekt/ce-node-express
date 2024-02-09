@@ -1,6 +1,5 @@
 import {
-    FormInstance, FormAssoc,
-    
+    FormInstance, FormAssoc,    
     FormWrapper, IndexType,
     getProjectCreator, EltNotFoundError, FormUtils, FormBlock,   
 } from "@codeffekt/ce-core-data";
@@ -26,23 +25,6 @@ export class FormCreateFacade {
     private form: FormInstance;
 
     constructor(private actors: FormCreateActor[] = []) {
-    }
-
-    async createFromTemplate(template: IndexType, partialContent: any, author: IndexType): Promise<FormInstance> {
-        const formTemplate = await this.formsService.getFormQuery(template, { extMode: true });
-        if(!formTemplate) {
-            throw new EltNotFoundError(`Cannot create form, form template ${template} not found`, { template });
-        }
-        const srcForm = FormUtils.getFormField("form", formTemplate);
-        if(!srcForm) {
-            throw new EltNotFoundError(`This template has no form field`, { template });
-        }
-        const builder = new FormTemplateBuilder();
-        const formInstance = builder.fromForm(srcForm, partialContent, author);        
-
-        this.applyRootFromTemplate(formTemplate, formInstance);
-
-        return this.formsService.insertForm(formInstance, author);
     }    
 
     async createFromRoot(root: IndexType, partialContent: any, author: IndexType): Promise<FormInstance> {
@@ -50,13 +32,8 @@ export class FormCreateFacade {
         if (!formRoot) {
             throw new EltNotFoundError(`Cannot create form, form root ${root} not found`, { root });
         }
-        const formInstance = this.formsService.createForm(formRoot, author);
-        if (partialContent) {
-            const formWrapper = new FormWrapper<any>({}, formInstance);
-            formWrapper.updateProps(partialContent);
-            formWrapper.fill();
-        }        
-
+        const builder = new FormTemplateBuilder();
+        const formInstance = builder.fromFormRoot(formRoot, partialContent, author);             
         return this.formsService.insertForm(formInstance, author);
     }
 
@@ -171,12 +148,5 @@ export class FormCreateFacade {
         if (FormUtils.isBlockIndex(block)) {
             FormWrapper.setFormValue(field, parentIndex, subForm);
         }
-    }
-
-    private applyRootFromTemplate(formTemplate: FormInstance, formInstance: FormInstance) {
-        const newRoot = FormWrapper.getFormValue("root", formTemplate);
-        if(newRoot) {
-            formInstance.root = newRoot;
-        }
-    }
+    }    
 }
