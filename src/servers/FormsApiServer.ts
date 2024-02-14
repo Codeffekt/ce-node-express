@@ -10,6 +10,7 @@ import { PublicForms } from "../forms/PublicForms";
 import { JwtUserRequest } from "../core/Auth";
 import { PublicFormsVersion } from "../forms/PublicFormsVersion";
 import { PublicFormsApiToken } from "../tokens/PublicFormsApiToken";
+import { PublicProcessing } from "../processing/PublicProcessing";
 
 @Service()
 @Controller({ path: '/api/' })
@@ -20,7 +21,8 @@ import { PublicFormsApiToken } from "../tokens/PublicFormsApiToken";
         PublicAssets,
         PublicForms, 
         PublicFormsVersion,
-        PublicFormsApiToken,       
+        PublicFormsApiToken,
+        PublicProcessing,       
     ]
 })
 export class FormsApiServer {

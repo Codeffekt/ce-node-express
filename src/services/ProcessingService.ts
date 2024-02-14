@@ -1,31 +1,50 @@
-import { AccountSettings, EltNotFoundError, FormUtils, FormWrapper, IndexType, Processing } from "@codeffekt/ce-core-data";
+import { AccountSettings, IndexType } from "@codeffekt/ce-core-data";
 import { Inject, Service } from "../core/CeService";
 import { FormsService } from "./FormsService";
+import { ProcessingOperator } from "../processing";
+import Axios, { AxiosRequestConfig } from "axios";
 
 @Service()
 export class ProcessingService {
 
     @Inject(FormsService)
     private readonly formsService: FormsService;
-
+s
     constructor() {
 
     }
 
     async start(processingId: IndexType, account: AccountSettings) {
-
-        const procForm = await this.formsService.getFormQuery(processingId, { extMode: true });
-
-        if (!procForm) {
-            throw new EltNotFoundError(`Processing ${processingId} not found`, { id: processingId });
-        }
-
-        const endpoint = FormUtils.getFormField("endpoint", procForm);
-
-        if (!endpoint) {
-            throw new EltNotFoundError(`Processing ${processingId} has no endpoint defined`, { id: processingId });
-        }              
-
-        return this.formsService.sanitizeForm(procForm);
+        const processing = await ProcessingOperator.fromProcessingId(processingId);
+        await this.callApi(processing, () => processing.getApiStart());
+        return processing.getSanitizedForm();
     }
+
+    async cancel(processingId: IndexType) {
+        const processing = await ProcessingOperator.fromProcessingId(processingId);
+        await this.callApi(processing, () => processing.getApiCancel());
+        return processing.getSanitizedForm();
+    }
+
+    async status(processingId: IndexType) {
+        const processing = await ProcessingOperator.fromProcessingId(processingId);
+        await this.callApi(processing, () => processing.getSelf());
+        return processing.getSanitizedForm();
+    }
+
+    private callApi(pop: ProcessingOperator, apiFunc: () => string) {
+        return this._call_rest_get(
+            apiFunc(),
+            pop.getHeaders()
+        )
+    }
+
+    private _call_rest_get(url: string, options: AxiosRequestConfig) {
+        return Axios.get<any>(
+            url,
+            options
+        );
+    }
+
+    
 }

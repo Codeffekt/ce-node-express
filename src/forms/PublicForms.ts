@@ -5,7 +5,11 @@ import {
 } from "@codeffekt/ce-core-data";
 import { FormCreateFacade } from "../forms/FormCreateFacade";
 import { Inject } from "../core/CeService";
-import { CeApiAccountId, CeApiAdmin, CeApiBinds, CeApiCall, CeApiComponent, CeApiRole } from "../express-router/ApiModule";
+import { 
+  CeApiAccountId, CeApiAdmin, 
+  CeApiBinds, CeApiCall, 
+  CeApiComponent, CeApiRole 
+} from "../express-router/ApiModule";
 import { FormMutateFacade } from "../forms/FormMutateFacade";
 import { FormsService } from "../services/FormsService";
 import { FormUpdateFacade } from "../forms/FormUpdateFacade";
@@ -30,7 +34,8 @@ export class PublicForms {
   }
 
   @CeApiCall
-  @CeApiRole(ROLE_CREATE)
+  @CeApiRole(
+    ROLE_CREATE)
   @CeApiBinds
   async copy(@CeApiAccountId id: IndexType, src: IndexType) {
     const creator = new FormCopyFacade();
@@ -38,7 +43,8 @@ export class PublicForms {
   }
 
   @CeApiCall
-  @CeApiRole(ROLE_CREATE)
+  @CeApiRole(
+    ROLE_CREATE)
   @CeApiBinds
   async create(@CeApiAccountId id: IndexType, root: IndexType, partialContent?: any) {
     const creator = new FormCreateFacade();
@@ -46,7 +52,8 @@ export class PublicForms {
   }  
 
   @CeApiCall
-  @CeApiRole(ROLE_CREATE)
+  @CeApiRole(
+    ROLE_CREATE)
   @CeApiBinds
   update(@CeApiAccountId id: IndexType, elt: FormInstanceExt) {
     const updater = new FormUpdateFacade();
@@ -54,7 +61,8 @@ export class PublicForms {
   }
 
   @CeApiCall
-  @CeApiRole(ROLE_CREATE)
+  @CeApiRole(
+    ROLE_CREATE)
   @CeApiBinds
   async updateForms(@CeApiAccountId id: IndexType, elts: FormInstanceExt[]) {
     const updater = new FormUpdateFacade();
@@ -62,7 +70,8 @@ export class PublicForms {
   }
 
   @CeApiCall
-  @CeApiRole(ROLE_CREATE)
+  @CeApiRole(
+    ROLE_CREATE)
   @CeApiBinds
   async updateFormsFromAssoc(@CeApiAccountId id: IndexType, ref: IndexType, elts: FormInstance[]) {
     const updater = new FormUpdateFacade();
@@ -82,7 +91,8 @@ export class PublicForms {
   }
 
   @CeApiCall
-  @CeApiRole(ROLE_CREATE)
+  @CeApiRole(
+    ROLE_CREATE)
   deleteForm(id: IndexType): Promise<boolean> {
     return this.formsService.deleteForms([id]);
   }  
