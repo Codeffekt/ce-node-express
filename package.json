@@ -1,6 +1,6 @@
 {
   "name": "@codeffekt/ce-node-express",
-  "version": "1.9.6",
+  "version": "1.9.7",
   "description": "CeForms backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -53,7 +53,7 @@
     "axios": "^0.25.0"
   },
   "devDependencies": {
-    "@codeffekt/ce-core-data": "^1.1.1",
+    "@codeffekt/ce-core-data": "^1.1.2",
     "@codeffekt/ce-events-data": "^1.1.0",
     "@types/bcrypt": "^3.0.0",
     "@types/chalk": "^2.2.0",
