@@ -1,5 +1,5 @@
 import { IndexType } from "@codeffekt/ce-core-data";
-import { Inject } from "../core/CeService";
+import { CeService, Inject } from "../core/CeService";
 import {
     CeApiAccountId, CeApiBinds,
     CeApiCall, CeApiComponent
@@ -10,8 +10,8 @@ import { AccountsService } from "../services/AccountsService";
 @CeApiComponent()
 export class PublicProcessing {
 
-    @Inject(ProcessingService)
-    private readonly processingService: ProcessingService;
+    /* @Inject(ProcessingService)
+    private readonly processingService: ProcessingService; */
 
     @Inject(AccountsService)
     private readonly accountsService: AccountsService;
@@ -22,18 +22,20 @@ export class PublicProcessing {
     @CeApiBinds
     async start(@CeApiAccountId id: IndexType, pid: IndexType) {
         const curAccount = await this.accountsService.getAccountFromId(id);
-        return this.processingService.start(pid, curAccount);
+        const processingService = CeService.get(ProcessingService);
+        const res = await processingService.start(pid, curAccount);
+        return res;
     }
 
     @CeApiCall
     @CeApiBinds
     async cancel(pid: IndexType) {
-        return this.processingService.cancel(pid);
+        return CeService.get(ProcessingService).cancel(pid);
     }
 
     @CeApiCall
     @CeApiBinds
     async status(pid: IndexType) {
-        return this.processingService.status(pid);
+        return CeService.get(ProcessingService).status(pid);
     }
 }

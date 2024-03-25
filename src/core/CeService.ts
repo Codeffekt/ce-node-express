@@ -11,10 +11,11 @@ export type CeServiceIdentifier<T> =
 
 export interface CeServiceParams {
     id?: string;
+    replace?: boolean;
 }
 
 export function Service(params?: CeServiceParams) {
-    return function classDecorator<T extends { new(...args: any[]): {} }>(constr: T) {        
+    return function classDecorator<T extends { new(...args: any[]): {} }>(constr: T) {            
         const id = params?.id ?? constr.name;        
         CeService.add(id, constr);
         return constr;
@@ -38,7 +39,7 @@ export class CeService {
 
     private static SERVICES: { id: string, instance: ICeService, constr: Constructable<any> }[] = [];    
 
-    static get<T = unknown>(identifier: CeServiceIdentifier<T>): T {        
+    static get<T = unknown>(identifier: CeServiceIdentifier<T>): T {                
         let service;
         if (typeof identifier === 'string') {
             service = this.SERVICES.find(s => s.id === identifier);

@@ -4,29 +4,6 @@ export class Roots {
 
     static forms: FormRoot[] = [
         {
-            "id": "forms-template",
-            "ctime": 1678889271269,
-            "title": "Formulaire template",
-            "type": "forms-template",
-            "content": {
-                "form": {
-                    "type": "index",
-                    "field": "form",
-                    "label": "Form"
-                },
-                "name": {
-                    "type": "text",
-                    "field": "name",
-                    "label": "Name"
-                },
-                "root": {
-                    "type": "text",
-                    "field": "root",
-                    "label": "Root"
-                }
-            }
-        },
-        {
             "id": "forms-account",
             "ctime": 1678806237183,
             "title": "Formulaire utilisateur",
@@ -114,46 +91,6 @@ export class Roots {
             }
         },
         {
-            "id": "forms-project-template",
-            "ctime": 1639560491556,
-            "mtime": 1665416455851,
-            "title": "Modèle de projet",
-            "type": "forms-project-template",
-            "content": {
-                "name": {
-                    "type": "text",
-                    "field": "name",
-                    "label": "Name"
-                },
-                "type": {
-                    "type": "text",
-                    "field": "type",
-                    "label": "Type"
-                },
-                "_assets": {
-                    "type": "assetArray",
-                    "field": "_assets",
-                    "label": "Media",
-                    "value": "assets-{$id}"
-                },
-                "account": {
-                    "type": "text",
-                    "field": "account",
-                    "label": "Compte"
-                },
-                "status": {
-                    "type": "text",
-                    "field": "status",
-                    "label": "Status"
-                },
-                "params": {
-                    "type": "object",
-                    "field": "params",
-                    "label": "Params"
-                }
-            }
-        },
-        {
             "id": "forms-sharing",
             "ctime": 1678806237163,
             "title": "Formulaire partage",
@@ -196,11 +133,6 @@ export class Roots {
                     "field": "status",
                     "label": "Status"
                 },
-                "type": {
-                    "type": "text",
-                    "field": "type",
-                    "label": "Type"
-                },
                 "name": {
                     "type": "text",
                     "field": "name",
@@ -212,8 +144,14 @@ export class Roots {
                     "label": "Description"
                 },
                 "params": {
-                    "type": "object",
-                    "field": "params"
+                    "type": "index",
+                    "field": "params",
+                    "root": "forms-processing-params"
+                },
+                "endpoint": {
+                    "type": "index",
+                    "field": "endpoint",
+                    "root": "forms-processing-endpoint"
                 },
                 "message": {
                     "type": "text",
@@ -231,6 +169,32 @@ export class Roots {
             }
         },
         {
+            "id": "forms-processing-params",
+            "ctime": 1678806237163,
+            "title": "Paramètres de processing",
+            "type": "forms-processing-params",
+            "content": {
+            }
+        },
+        {
+            "id": "forms-processing-endpoint",
+            "ctime": 1678806237163,
+            "title": "Processing enpoint",
+            "type": "forms-processing-endpoint",
+            "content": {
+                "server": {
+                    "type": "text",
+                    "field": "server",
+                    "label": "Server"
+                },
+                "token": {
+                    "type": "text",
+                    "field": "token",
+                    "label": "Token"
+                },
+            }
+        },
+        {
             "id": "forms-mask",
             "ctime": 1620049568340,
             "mtime": 1665653692841,
@@ -242,34 +206,6 @@ export class Roots {
                     "field": "mask",
                     "label": "Mask"
                 },
-                "root": {
-                    "type": "index",
-                    "field": "root",
-                    "label": "Root"
-                },
-                "style": {
-                    "type": "style",
-                    "field": "style",
-                    "label": "Style"
-                },
-                "category": {
-                    "type": "index",
-                    "field": "category",
-                    "label": "Category"
-                },
-                "disabled": {
-                    "type": "boolean",
-                    "field": "disabled",
-                    "label": "Disabled"
-                }
-            }
-        },
-        {
-            "id": "forms-style",
-            "ctime": 1620049568340,
-            "title": "Style",
-            "type": "forms-style",
-            "content": {
                 "root": {
                     "type": "index",
                     "field": "root",

@@ -7,17 +7,17 @@ import Axios, { AxiosRequestConfig } from "axios";
 @Service()
 export class ProcessingService {
 
-    @Inject(FormsService)
-    private readonly formsService: FormsService;
+    /* @Inject(FormsService)
+    private readonly formsService: FormsService; */
 s
     constructor() {
-
+        console.log("ProcessingService created");
     }
 
-    async start(processingId: IndexType, account: AccountSettings) {
+    async start(processingId: IndexType, account: AccountSettings) {         
         const processing = await ProcessingOperator.fromProcessingId(processingId);
         await this.callApi(processing, () => processing.getApiStart());
-        return processing.getSanitizedForm();
+        return processing.getSanitizedForm();        
     }
 
     async cancel(processingId: IndexType) {

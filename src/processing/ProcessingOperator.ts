@@ -10,12 +10,12 @@ export class ProcessingOperator {
     private form: FormInstanceExt;
     private endpoint: FormInstanceExt;
 
-    private constructor(private pid: IndexType) {
-        this.retrieveProcessingData();
+    private constructor(private pid: IndexType) {        
     }
 
     static async fromProcessingId(pid: IndexType) {
         const operator = new ProcessingOperator(pid);
+        await operator.retrieveProcessingData();
         return operator;
     }
 
@@ -59,7 +59,6 @@ export class ProcessingOperator {
 
         if (!this.endpoint) {
             throw new EltNotFoundError(`Processing ${this.pid} has no endpoint defined`, { id: this.pid });
-        }              
-
+        }                     
     }
 }
