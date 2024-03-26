@@ -1,4 +1,4 @@
-import { EltNotFoundError, FormInstanceExt, FormUtils, FormWrapper, IndexType } from "@codeffekt/ce-core-data";
+import { AccountSettings, EltNotFoundError, FormInstanceExt, FormUtils, FormWrapper, IndexType } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 
@@ -10,11 +10,11 @@ export class ProcessingOperator {
     private form: FormInstanceExt;
     private endpoint: FormInstanceExt;
 
-    private constructor(private pid: IndexType) {        
+    private constructor(private pid: IndexType, private account: AccountSettings) {        
     }
 
-    static async fromProcessingId(pid: IndexType) {
-        const operator = new ProcessingOperator(pid);
+    static async fromProcessingId(pid: IndexType, account: AccountSettings) {
+        const operator = new ProcessingOperator(pid, account);
         await operator.retrieveProcessingData();
         return operator;
     }
@@ -24,15 +24,15 @@ export class ProcessingOperator {
     }
 
     getApiStart(): string {
-        return this.getApiEndpoint(`start/${this.form.id}`);
+        return this.getApiEndpoint(`processing/${this.form.id}`);
     }
 
     getApiCancel(): string {
         return this.getApiEndpoint(`cancel`);
     }
 
-    getSelf(): string {
-        return this.getApiEndpoint(`self`);
+    getStatus(): string {
+        return this.getApiEndpoint(``);
     }
 
     getHeaders() {
@@ -40,6 +40,16 @@ export class ProcessingOperator {
         return {
             headers: { Authorization: `Bearer ${token}` }
         };
+    }
+
+    isStarted() {
+        const status = FormWrapper.getFormValue("status", this.form);
+        return status === "PENDING" || status === "RUNNING";
+    }
+
+    async setPendingStatus() {
+        FormWrapper.setFormValue("status", "PENDING", this.form);
+        await this.formsService.updateForm(this.getSanitizedForm(), this.account.id);
     }
 
     private getApiEndpoint(endpoint: string) {

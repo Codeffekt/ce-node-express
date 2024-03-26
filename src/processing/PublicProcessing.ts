@@ -29,13 +29,15 @@ export class PublicProcessing {
 
     @CeApiCall
     @CeApiBinds
-    async cancel(pid: IndexType) {
-        return CeService.get(ProcessingService).cancel(pid);
+    async cancel(@CeApiAccountId id: IndexType, pid: IndexType) {
+        const curAccount = await this.accountsService.getAccountFromId(id);
+        return CeService.get(ProcessingService).cancel(pid, curAccount);
     }
 
     @CeApiCall
     @CeApiBinds
-    async status(pid: IndexType) {
-        return CeService.get(ProcessingService).status(pid);
+    async status(@CeApiAccountId id: IndexType, pid: IndexType) {
+        const curAccount = await this.accountsService.getAccountFromId(id);
+        return CeService.get(ProcessingService).status(pid, curAccount);
     }
 }
