@@ -73,8 +73,8 @@ export class RemoteApiService {
         return this.callProject("getFormQuery", pid, id, creator, query);
     }
 
-    getFormQueryGeneric(query: FormQuery): Promise<FormInstance> {
-        return this.callForms("getFormQuery", query);
+    getFormQueryGeneric(id: IndexType, query: FormQuery): Promise<FormInstance> {
+        return this.callForms("getFormQuery", id, query);
     }
 
     getRoot(rid: IndexType): Promise<FormRoot> {

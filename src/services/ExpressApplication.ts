@@ -28,6 +28,7 @@ export class ExpressApplication {
 
     private app: express.Application;
     private config: ExpressApplicationConfig;
+    private server: any;
 
     constructor(
     ) {
@@ -67,11 +68,23 @@ export class ExpressApplication {
         const port = process.env.PORT || 3000;
         const version = process.env.VERSION || "unknown";
 
-        app.listen({ port: port }, () => {
+        this.server = app.listen({ port: port }, () => {
             console.log(`🚀 ${appName} version ${version} ready at http://localhost:${port}`);
         });
 
         return app;
+    }
+
+    async stop() {
+        await CeService.get(DatabaseServer).close();
+        return new Promise((resolve, reject) => {            
+            this.server.close((err) => {                
+                if (err) {
+                    reject(err);
+                }
+                resolve(1);
+            });
+        });
     }
 
     async createApp(config: ExpressApplicationConfig) {
