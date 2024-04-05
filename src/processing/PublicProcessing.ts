@@ -21,6 +21,7 @@ export class PublicProcessing {
     @CeApiCall
     @CeApiBinds
     async start(@CeApiAccountId id: IndexType, pid: IndexType) {
+        console.log("Ask to start", pid);
         const curAccount = await this.accountsService.getAccountFromId(id);
         const processingService = CeService.get(ProcessingService);
         const res = await processingService.start(pid, curAccount);

@@ -94,6 +94,9 @@ export class RemoteApiService {
     }
 
     private async _call<T>(getApiFunc: () => string, msgFunc: () => any, options: AxiosRequestConfig, ...params: any[]): Promise<T> {
+        console.log("_call", getApiFunc());
+        console.log("_params", msgFunc.apply(this, params as any));
+        console.log(options);
         const res = await Axios.post<T>(
             getApiFunc(),
             msgFunc.apply(this, params as any),

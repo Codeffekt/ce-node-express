@@ -56,7 +56,7 @@ export class ExpressApplication {
                 jwtRefreshExpiration: parseInt(process.env.JWT_REFRESH_EXPIRATION),
             },
             corsConfig: {
-                origin: ['http://localhost:4200', 'http://localhost:4201', 'http://localhost:4202'],
+                origin: ['http://localhost:4200', 'http://localhost:4201', 'http://localhost:4202', 'http://localhost:4002'],
                 optionsSuccessStatus: 200,
                 credentials: true
 

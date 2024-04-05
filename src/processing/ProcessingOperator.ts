@@ -28,7 +28,7 @@ export class ProcessingOperator {
     }
 
     getApiCancel(): string {
-        return this.getApiEndpoint(`cancel`);
+        return this.getApiEndpoint(`cancel/${this.form.id}`);
     }
 
     getStatus(): string {

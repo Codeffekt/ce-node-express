@@ -51,11 +51,13 @@ export class ProcessingApplication {
 
     @Get({ path: '/processing/:pid' })
     async start(req: Request, res: Response, next: NextFunction) {
-        try {
+        try {           
+
             const pid = req.params.pid;
             
             if (this.isCurrentProcessing(pid)) {
                 res.json(this.processing);
+                return;
             }
 
             if (this.haveProcessing()) {
@@ -138,6 +140,7 @@ export class ProcessingApplication {
     }
 
     private async retrieveProcessing(pid: IndexType) {
+        console.log("Processing Application retrieveProcessing", pid);
         this.processing = await this.remoteApiService.getFormQueryGeneric(pid, {
             extMode: true
         });

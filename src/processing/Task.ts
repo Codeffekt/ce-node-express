@@ -1,4 +1,4 @@
-import { FormInstanceExt, FormWrapper, IndexType, ProcessingMsg, ProcessingStatus } from '@codeffekt/ce-core-data';
+import { FormInstanceExt, FormWrapper, IndexType, Processing, ProcessingMsg, ProcessingStatus } from '@codeffekt/ce-core-data';
 import { Worker } from 'worker_threads';
 import { Inject } from '../core/CeService';
 import { RemoteApiService } from '../services/RemoteApiService';
@@ -6,7 +6,7 @@ import { RemoteApiService } from '../services/RemoteApiService';
 export class Task {
 
     private worker: Worker;
-    private processing: FormInstanceExt;
+    private processing?: FormInstanceExt;
 
     @Inject(RemoteApiService)
     private readonly remoteApiService: RemoteApiService;
@@ -15,6 +15,8 @@ export class Task {
     }
 
     async run(processing: FormInstanceExt) {
+
+        this.processing = processing;
 
         await this.updateProcessingStatus("RUNNING");
 
@@ -28,16 +30,11 @@ export class Task {
         });
 
         this.worker.on('message', (message: ProcessingMsg) => {
-            console.log("Receive message", message);
-            if (message.type === "DONE") {
-                this.worker.terminate();
-            }
+            this.processMessage(message);
         });
 
         this.worker.on('exit', (code) => {
-            if (code !== 0) {
-                this.worker.terminate();
-            }
+            this.clearProcessing();
         });
 
     }
@@ -66,5 +63,23 @@ export class Task {
     private async updateProcessingStatus(status: ProcessingStatus) {
         FormWrapper.setFormValue("status", status, this.processing);
         await this.remoteApiService.updateForm(this.processing);
+    }
+
+    private async updateForm(data: Partial<Processing>) {
+        FormWrapper.setFormValues(data, this.processing);
+        await this.remoteApiService.updateForm(this.processing);
+    }
+
+    private async processMessage(message: ProcessingMsg) {
+        console.log("Receive message", message);
+        await this.updateForm(message.data);
+        if (message.type === "DONE" || message.type === "ERROR") {            
+            this.worker.terminate();
+        } 
+        
+    }
+
+    private clearProcessing() {
+        this.processing = undefined;
     }
 }

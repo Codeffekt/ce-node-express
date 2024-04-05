@@ -44,6 +44,7 @@ export class ProcessingService {
     }
 
     private _call_rest_get(url: string, options: AxiosRequestConfig) {
+        console.log("CALL REST GET", url, options);
         return Axios.get<any>(
             url,
             options
