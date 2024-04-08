@@ -1,10 +1,10 @@
 import * as express from "express";
 import { Request, Response, NextFunction } from "express";
-import { CeService, Inject, Service } from "../core/CeService";
+import { Inject, Service } from "../core/CeService";
 import { Controller, ExpressRouter, Get } from "../express-router/ExpressRouter";
 import { Task } from "../processing/Task";
 import { RemoteApiService } from "../services/RemoteApiService";
-import { FormInstanceExt, FormWrapper, IndexType, ProcessingStatus } from "@codeffekt/ce-core-data";
+import { FormInstanceExt, IndexType } from "@codeffekt/ce-core-data";
 
 export interface ProcessingApplicationConfig {
     task: Task;
@@ -102,26 +102,7 @@ export class ProcessingApplication {
         } catch (err) {
             next(err);
         }
-    }
-
-    /* async test_start(pid: IndexType) {
-
-        this.initRemoteApi();
-
-        if (this.processing && this.processing.id !== pid) {
-            throw new Error(`A processing is still running ${this.processing.id}`);
-        }
-
-        if (this.processing) {
-            if (this.processing.id === pid && FormWrapper.getFormValue("status", this.processing) === "RUNNING") {
-                return;
-            }
-        }
-
-        await this.retrieveProcessing(pid);
-
-        return this.config.task.run(this.processing);
-    } */   
+    }    
 
     private haveProcessing() {
         return this.config.task.haveProcessing();
@@ -139,8 +120,7 @@ export class ProcessingApplication {
         });
     }
 
-    private async retrieveProcessing(pid: IndexType) {
-        console.log("Processing Application retrieveProcessing", pid);
+    private async retrieveProcessing(pid: IndexType) {        
         this.processing = await this.remoteApiService.getFormQueryGeneric(pid, {
             extMode: true
         });
