@@ -5,3 +5,4 @@ export * from './CeEventClient';
 export * from './GisDatabase';
 export * from './AssetsApiServer';
 export * from './FormsApiServer';
+export * from './ProcessingApplication';

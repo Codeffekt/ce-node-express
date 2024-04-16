@@ -16,7 +16,7 @@ export class ErrorServer {
     }
 
     @AppUse()
-    errorHandler(err: APIError|any, req: Request, res: Response, next: NextFunction) {
+    errorHandler(err: APIError|any, req: Request, res: Response, next: NextFunction) {        
 
         if(err instanceof APIError) {
             res.status(err.returnStatus);

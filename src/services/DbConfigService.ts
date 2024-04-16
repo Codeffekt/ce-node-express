@@ -1,8 +1,12 @@
-import { AccountSettings } from "@codeffekt/ce-core-data";
 import { Inject, Service } from "../core/CeService";
-import { DB_TABLE_ACCOUNTS, DB_TABLE_ASSETS, DB_TABLE_FORMS, DB_TABLE_FORMSROOT, DB_TABLE_FORMS_ADMIN, DB_TABLE_FORMS_ASSOC, DB_TABLE_FORMS_EVENT, DB_TABLE_FORMS_TOKEN, DB_TABLE_FORMS_VERSION, DB_TABLE_PROJECTS } from "../core/Db";
+import {
+    DB_TABLE_ACCOUNTS, DB_TABLE_ASSETS,
+    DB_TABLE_FORMS, DB_TABLE_FORMSROOT,
+    DB_TABLE_FORMS_ADMIN, DB_TABLE_FORMS_ASSOC,
+    DB_TABLE_FORMS_EVENT, DB_TABLE_FORMS_TOKEN,
+    DB_TABLE_FORMS_VERSION, DB_TABLE_PROJECTS
+} from "../core/Db";
 import { DatabaseServer } from "../servers/DatabaseServer";
-import { AuthService } from "./AuthService";
 import { ContextService } from "./ContextService";
 
 export interface DbConfigConfig {
@@ -10,19 +14,6 @@ export interface DbConfigConfig {
     userName: string;
     password: string;
 }
-
-/* export interface PgTableSchema {
-    table_schema: string;
-    table_name: string;    
-} */
-
-const SUPER_ADMIN_LOGIN = "admin";
-const SUPER_ADMIN_PASSWD = "admin";
-const SUPER_ADMIN_ACCOUNT = "admin";
-
-const DEFAULT_ADMIN_LOGIN = "admin-default";
-const DEFAULT_ADMIN_PASSWD = "admin";
-const DEFAULT_ADMIN_ACCOUNT = "default";
 
 @Service()
 export class DbConfigService {
@@ -78,9 +69,19 @@ export class DbConfigService {
         await this.createTableFormsVersion();
         await this.createTableFormsToken();
         await this.createTableFormsEvent();
-        await this.createTableProjects();
-        await this.insertSuperAdminUser();
-        await this.insertDefaultAccount();
+        await this.createTableProjects();        
+    }
+
+    async clearTables() {
+        await this.clearTable(DB_TABLE_ACCOUNTS);
+        await this.clearTable(DB_TABLE_ASSETS);
+        await this.clearTable(DB_TABLE_FORMS);
+        await this.clearTable(DB_TABLE_FORMSROOT);
+        await this.clearTable(DB_TABLE_FORMS_VERSION);
+        await this.clearTable(DB_TABLE_FORMS_TOKEN);
+        await this.clearTable(DB_TABLE_FORMS_EVENT);
+        await this.clearTable(DB_TABLE_FORMS_ASSOC);
+        await this.clearTable(DB_TABLE_FORMS_ADMIN);
     }
 
     async clearDatabase() {
@@ -178,7 +179,7 @@ export class DbConfigService {
         }
 
         await this.doTransaction([
-            ...this.getCreateFormTableTransaction(tableName),            
+            ...this.getCreateFormTableTransaction(tableName),
             `create index ${tableName}_root on ${tableName} using btree((data->>'root'))`,
             `create index ${tableName}_ctime on ${tableName} using btree((data->>'ctime'))`
         ]);
@@ -192,7 +193,7 @@ export class DbConfigService {
 
     private async createTableFormsAdmin() {
         const isCreated = await this.createTableFormsFromName(DB_TABLE_FORMS_ADMIN);
-        if(isCreated) {
+        if (isCreated) {
             await this.createTriggers(DB_TABLE_FORMS_ADMIN);
         }
     }
@@ -305,67 +306,6 @@ export class DbConfigService {
         $$
         `;
         await this.db.poolProject.query(query);
-    }
-
-    private async insertSuperAdminUser() {
-
-        const res = await this.db.poolProject.query(`select * from ${DB_TABLE_ACCOUNTS} where data->>'account'='${SUPER_ADMIN_ACCOUNT}'`);
-        if (res.rowCount > 0) {
-            return;
-        }
-
-        const hashPasswd = await AuthService.createHash(SUPER_ADMIN_PASSWD);
-
-        const superAdmin: AccountSettings = {
-            ...this.context.createCore(),
-            key: this.context.createUnique(),
-            account: SUPER_ADMIN_ACCOUNT,
-            login: SUPER_ADMIN_LOGIN,
-            passwd: hashPasswd,
-            firstName: undefined,
-            lastName: undefined,
-            email: undefined,
-            lang: undefined,
-            role: "admin",
-            projects: []
-        };
-
-        await this.db.poolProject.query(`insert into ${DB_TABLE_ACCOUNTS}(data) values ('${JSON.stringify(superAdmin)}')`);
-    }
-
-    private async insertDefaultAccount() {
-        const res = await this.db.poolProject.query(`select * from ${DB_TABLE_ACCOUNTS} where data->>'account'='${DEFAULT_ADMIN_ACCOUNT}'`);
-        if (res.rowCount > 0) {
-            return;
-        }
-
-        const superAdmin = await this.getSuperAdminAccount();
-
-        const hashPasswd = await AuthService.createHash(DEFAULT_ADMIN_PASSWD);
-
-        const defaultAdmin: AccountSettings = {
-            ...this.context.createCore(),
-            key: superAdmin.key,
-            account: DEFAULT_ADMIN_ACCOUNT,
-            login: DEFAULT_ADMIN_LOGIN,
-            passwd: hashPasswd,
-            firstName: undefined,
-            lastName: undefined,
-            email: undefined,
-            lang: undefined,
-            role: "admin",
-            projects: []
-        };
-
-        await this.db.poolProject.query(`insert into ${DB_TABLE_ACCOUNTS}(data) values ('${JSON.stringify(defaultAdmin)}')`);
-    }
-
-    private async getSuperAdminAccount() {
-        const res = await this.db.poolProject.query(`select data from ${DB_TABLE_ACCOUNTS} where data->>'account'='${SUPER_ADMIN_ACCOUNT}'`);
-        if (res.rowCount === 0) {
-            throw new Error(`SuperAdmin account not found !`);
-        }
-        return res.rows[0] as AccountSettings;
     }
 
     private async createTriggers(tableName: string) {

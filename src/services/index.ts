@@ -11,3 +11,5 @@ export * from './FormsEventsService';
 export * from './DbConfigService';
 export * from './RemoteApiService';
 export * from './FormsApiTokensService';
+export * from './CeFormsInitService';
+export * from './ProcessingService';

@@ -73,8 +73,8 @@ export class RemoteApiService {
         return this.callProject("getFormQuery", pid, id, creator, query);
     }
 
-    getFormQueryGeneric(query: FormQuery): Promise<FormInstance> {
-        return this.callForms("getFormQuery", query);
+    getFormQueryGeneric(id: IndexType, query: FormQuery): Promise<FormInstance> {
+        return this.callForms("getFormQuery", id, query);
     }
 
     getRoot(rid: IndexType): Promise<FormRoot> {
@@ -94,6 +94,9 @@ export class RemoteApiService {
     }
 
     private async _call<T>(getApiFunc: () => string, msgFunc: () => any, options: AxiosRequestConfig, ...params: any[]): Promise<T> {
+        console.log("_call", getApiFunc());
+        console.log("_params", msgFunc.apply(this, params as any));
+        console.log(options);
         const res = await Axios.post<T>(
             getApiFunc(),
             msgFunc.apply(this, params as any),

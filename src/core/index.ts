@@ -4,3 +4,4 @@ export * from './Db';
 export * from './Errors';
 export * from './core';
 export * from './OldProject';
+export * from './Roots';

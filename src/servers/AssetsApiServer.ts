@@ -1,12 +1,13 @@
 import { Response } from "express";
 import { NextFunction } from "express";
 import * as multer from "multer";
-import { readFile } from "fs";
+import { existsSync, readFile } from "fs";
 import { Inject, Service } from "../core/CeService";
 import { Controller, Get, Post } from "../express-router/ExpressRouter";
 import { StoragePathService } from "../services/StoragePathService";
 import { AssetsService } from "../services/AssetsService";
 import { JwtUserRequest } from "../core/Auth";
+import { EltNotFoundError } from "@codeffekt/ce-core-data";
 const quickthumb = require("@codeffekt/quickthumb");
 
 @Service()
@@ -49,6 +50,9 @@ export class AssetsApiServer {
             const fileDir = `${this.storageService.getStoragePath(bucketId, req.user.data.diagAccount, false)}/`;                           
             res.contentType("image/jpg");                        
             req.url = bucketId; // we force the url replacement because quickthumb parse this property to retrieve the image name
+            if(!existsSync(`${fileDir}/${bucketId}`)) {
+                throw new EltNotFoundError(`Image ${req.params.id} not found`, req.params);
+            }
             return quickthumb.static(fileDir)(req, res, next);            
         } catch (err) {
             next(err);
