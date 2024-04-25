@@ -5,7 +5,7 @@ import { AuthService } from "./AuthService";
 import { ContextService } from "./ContextService";
 import { DbConfigService } from "./DbConfigService";
 import { FormsService } from "./FormsService";
-import { Roots } from "../core";
+import { Roots } from "../core/Roots";
 
 export interface InitUserConfig {
     login: string;
@@ -13,16 +13,18 @@ export interface InitUserConfig {
     account: string;
 }
 
-export interface InitConfig {    
+export interface InitConfig {
     defaultAccount: InitUserConfig;
+    clearTables: boolean;
 }
 
-const INIT_CONFIG: InitConfig = {   
+const INIT_CONFIG: InitConfig = {
     defaultAccount: {
         login: "admin-default",
         passwd: "admin",
         account: "dedault"
-    }
+    },
+    clearTables: true
 };
 
 @Service()
@@ -44,10 +46,12 @@ export class CeFormsInitService {
 
     async init(config: InitConfig = INIT_CONFIG) {
         await this.dbConfigService.initTables();
-        await this.dbConfigService.clearTables();  
+        if (config.clearTables) {
+            await this.dbConfigService.clearTables();
+        }
         await this.insertFormsRoot();
-        await this.insertDefaultAccount(config);        
-    }    
+        await this.insertDefaultAccount(config);
+    }
 
     private async insertFormsRoot() {
         const roots = Roots.forms.map<FormRoot>(root => ({
@@ -55,14 +59,22 @@ export class CeFormsInitService {
             ctime: Date.now()
         }));
 
-        for(const root of roots) {
+        for (const root of roots) {
             await this.formsService.upsertFormRoot(root);
         }
     }
 
-    private async insertDefaultAccount(config: InitConfig) {            
+    private async insertDefaultAccount(config: InitConfig) {
 
-        const defaultAdminConfig = config.defaultAccount;        
+        const defaultAdminConfig = config.defaultAccount;
+
+        const existingAccount = await this.accountsService.getAccountFromLogin(defaultAdminConfig.login);
+
+        console.log(existingAccount);
+
+        if(existingAccount) {
+            return;
+        }
 
         const hashPasswd = await AuthService.createHash(defaultAdminConfig.passwd);
 

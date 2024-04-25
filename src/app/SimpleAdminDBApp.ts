@@ -6,6 +6,7 @@ import { DatabaseServer } from "../servers/DatabaseServer";
 import { AccountsService } from "../services/AccountsService";
 import { ProjectsService } from "../services/ProjectsService";
 import { FormsService } from "../services/FormsService";
+import { SimpleDBConnect } from "./SimpleDBConnect";
 
 export class SimpleAdminDBAppImpl {
     constructor() {
@@ -34,19 +35,21 @@ export class SimpleAdminDBAppImpl {
             throw new Error("Missing DB parameters PGUSER, PGDB or PGPASSWD");
         }
     
-        CeService.get(DbConfigService).setConfig(adminConfig);    
+        const admin = CeService.get(DbConfigService);
+        
+        admin.setConfig(adminConfig);    
 
-        await CeService.get(DatabaseServer).setConfig({
-            host: process.env.PGHOST,
-            user: process.env.PG_ADMIN_USER || "postgres",
-            password: process.env.PG_ADMIN_PASSWD || "postgres",
-            database: process.env.PG_ADMIN_DB || "postgres",
-            port: parseInt(process.env.PGPORT)
-        });
+        await SimpleDBConnect.connectAdminToAdminDB();
+
+        await admin.initDatabase();
+
+        await SimpleDBConnect.connectAdminToFormsDB();
+
+        await admin.initPublicPrivileges();
     }
 
     async close() {
-        await CeService.get(DatabaseServer).close();        
+        await SimpleDBConnect.close();     
     }
 
     getContext(): ContextService {

@@ -1,0 +1,10 @@
+version: '3'
+services:
+  ce-forms-test-db:
+    container_name: "ce-forms-test-db"
+    ports: ["4444:5432"]
+    image: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres

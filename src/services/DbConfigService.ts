@@ -57,6 +57,11 @@ export class DbConfigService {
         await this.grantUserPrivileges(this.config.userName, this.config.dbName);
     }
 
+    async initPublicPrivileges() {
+        this.context.logInfo(`Grant public schema privileges to ${this.config.userName} on ${this.config.dbName}`);
+        await this.grantPublicSchemaPrivileges(this.config.userName);
+    }
+
     async initTables() {
         await this.createUpdateNotifyFunc();
         await this.createMergeRecursiveFunc();
@@ -118,6 +123,10 @@ export class DbConfigService {
 
     private async grantUserPrivileges(userName: string, dbName: string) {
         await this.db.poolProject.query(`grant all privileges on database ${dbName} to ${userName}`);
+    }
+
+    private async grantPublicSchemaPrivileges(userName: string) {
+        await this.db.poolProject.query(`GRANT ALL ON SCHEMA public TO ${userName}`);
     }
 
     private async createTableAccounts() {

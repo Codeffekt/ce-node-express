@@ -1,6 +1,10 @@
 {
   "name": "@codeffekt/ce-node-express",
+<<<<<<< Updated upstream
   "version": "1.9.9",
+=======
+  "version": "1.9.8",
+>>>>>>> Stashed changes
   "description": "CeForms backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
