@@ -11,3 +11,5 @@
 ## [1.9.5] - Add missing forms root forms-mask, forms-style, forms-app, forms-export
 
 ## [1.9.6] - Use rootField in form mutation to retrieve root element within a form block
+
+## [1.9.9] - Add postgres > v15 compatibility
