@@ -13,6 +13,10 @@ import { DatabaseServer } from "../servers/DatabaseServer";
 import { AuthService, AuthServiceConfig } from './AuthService';
 import { CeService, Service } from "../core/CeService";
 import { ContextService } from "./ContextService";
+import { SimpleDBApp } from "../app/SimpleDBApp";
+import { DbConfigService } from "./DbConfigService";
+import { CeFormsInitService } from "./CeFormsInitService";
+import { SimpleAdminDBApp } from "../app/SimpleAdminDBApp";
 
 export interface ExpressApplicationConfig {
     contextRoot: string;
@@ -132,5 +136,63 @@ export class ExpressApplication {
 
     getConfig() {
         return this.config;
+    }
+
+    async checkAppInstallation() {
+
+        console.info(`Checking installation and database access...`);
+
+        const ECONNREFUSED = -61;
+
+        try {
+
+            await SimpleDBApp.init();   
+            await SimpleDBApp.close();    
+    
+        } catch(err) {
+    
+            if(err.errno === ECONNREFUSED) {
+                console.error("Database network access refused");
+                process.exit(-1);
+            }
+    
+            if(err.code === "28P01" || err.code === "3D000") {
+                console.warn(`Authentication failed or database not found. 
+                Maybe the required database and tables are not installed.
+                The installation process will be started.`);
+                await this.startAppInstallation();
+                return;
+            }
+    
+            console.error(err);
+            process.exit(-2);
+        }
+
+        console.info(`Installation OK`);
+    }
+
+    private async startAppInstallation() {
+        try {
+            const admin = CeService.get(DbConfigService);
+            const initService = CeService.get(CeFormsInitService);
+    
+            await SimpleAdminDBApp.init();
+            await admin.initDatabase();
+            await SimpleAdminDBApp.close();
+    
+            await SimpleDBApp.init();
+            await initService.init({        
+                defaultAccount: {
+                    login: process.env.CE_FORMS_LOGIN,
+                    account: process.env.CE_FORMS_ACCOUNT,
+                    passwd: process.env.CE_FORMS_PASSWD,
+                },
+                clearTables: true
+            });
+            await SimpleDBApp.close();
+        } catch(err) {
+            console.error(err);
+            process.exit(-3);
+        }
     }
 }
