@@ -1,9 +1,9 @@
 import {
     FormAggField,
     FormQuery, FormQueryField,
-    FormQueryFieldExpr, FormQueryFieldLogic, FormQuerySortField
+    FormQueryFieldExpr, FormQuerySortField
 } from "@codeffekt/ce-core-data";
-import { DB_TABLE_FORMS, DB_TABLE_FORMSROOT, DB_TABLE_FORMS_ASSOC } from "../core/Db";
+import { DB_TABLE_FORMS, DB_TABLE_FORMSROOT, DB_TABLE_FORMS_ASSOC, DbTablesOption } from "../core/Db";
 import { FormQueryLogicUtils } from "./FormQueryLogicUtils";
 import { FormQueryUtils } from "./FormQueryUtils";
 import { SqlAggFactory } from "./SqlAggFactory";
@@ -25,13 +25,7 @@ import { FormQueryFieldUtils } from "./FormQueryFieldUtils";
 // (select count(*) over() as total, forms.data as data from 
 // (select * from forms order by  forms.data->>'ctime' desc ) forms  ) forms
 
-export interface FormQueryParserOptions {
-    formsTableName: string;
-    formsRootTableName: string;
-    assocsTableName: string;
-    accountsTableName: string;
-    rootTableName: string;
-}
+export type FormQueryParserOptions = DbTablesOption;
 
 export class FormQueryParser {
 

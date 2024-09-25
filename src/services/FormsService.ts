@@ -9,12 +9,17 @@ import * as format from "pg-format";
 import { ReplaySubject } from "rxjs";
 import { filter } from "rxjs/operators";
 import { Inject, Service } from "../core/CeService";
-import { DB_TABLE_ACCOUNTS, DB_TABLE_FORMS, DB_TABLE_FORMSROOT, DB_TABLE_FORMS_ASSOC } from "../core/Db";
+import { 
+    DB_TABLE_ACCOUNTS, DB_TABLE_FORMS, 
+    DB_TABLE_FORMSROOT, DB_TABLE_FORMSROOT_ASSOC, 
+    DB_TABLE_FORMS_ASSOC, DbTablesOption } from "../core/Db";
 import { FormQueryParser } from "../forms-sql/FormQueryParser";
 import { SqlRenderer } from "../forms-sql/SqlRenderer";
 import { DatabaseServer, isFormsRootUpdate } from "../servers/DatabaseServer";
 import { ContextService } from "./ContextService";
 import { FormsQueryProcess } from "./FormsQueryProcess";
+import { SqlInsertBuilder } from "../forms-sql/SqlInsertBuilder";
+import { SqlDeleteBuilder } from "../forms-sql/SqlDeleteBuilder";
 
 const QUERY_FORMS_ASSOC = `select (select count(*) from forms, forms_assoc where ref=$1 and data->>'id'=form) as total, 
 data from forms, forms_assoc where ref=$1 and data->>'id'=form`;
@@ -35,6 +40,14 @@ export class FormsService {
     @Inject(ContextService)
     private readonly context: ContextService;
 
+    private dbTables: DbTablesOption = {
+        formsTableName: DB_TABLE_FORMS, 
+        formsRootTableName: DB_TABLE_FORMSROOT,
+        assocsTableName: DB_TABLE_FORMS_ASSOC,
+        accountsTableName: DB_TABLE_ACCOUNTS,
+        rootTableName: DB_TABLE_FORMSROOT,
+    };
+
     constructor() {
     }
 
@@ -51,19 +64,7 @@ export class FormsService {
 
     getFormRoots() {
         return this.db.getCachedFormsRoot();
-    }
-
-    getFormsRootQuery(query: FormQuery): Promise<DbArrayRes<FormRoot>> {
-        const queryProcess = new FormsQueryProcess();
-        return queryProcess.execute({ ...query, extMode: false }, 
-                { 
-                    formsTableName: DB_TABLE_FORMS, 
-                    formsRootTableName: DB_TABLE_FORMSROOT,
-                    assocsTableName: DB_TABLE_FORMS_ASSOC,
-                    accountsTableName: DB_TABLE_ACCOUNTS,
-                    rootTableName: DB_TABLE_FORMSROOT,
-                });
-    }
+    }    
 
     deleteFormRoot(id: IndexType): Promise<boolean> {
         return this.db.poolProject.query("delete from formsroot where data->>'id'=$1", [id])
@@ -136,7 +137,9 @@ export class FormsService {
     }
 
     async insertFormAssoc(assoc: FormAssoc): Promise<FormAssoc> {
-        await this.db.poolProject.query("insert into forms_assoc (ref,form) values($1, $2) on conflict(ref,form) do nothing", [assoc.ref, assoc.form]);
+        await this.db.poolProject.query(
+            SqlInsertBuilder.fromFormAssoc(assoc, this.dbTables)
+        );        
         return assoc;
     }
 
@@ -144,9 +147,9 @@ export class FormsService {
         if(!elts?.length) {
             return true;
         }
-
-        const query = format(`insert into forms_assoc (ref,form) values %L on conflict(ref,form) do nothing`, elts.map(elt => [elt.ref, elt.form]));
-        await this.db.poolProject.query(query);
+        await this.db.poolProject.query(
+            SqlInsertBuilder.fromFormsAssoc(elts, this.dbTables)
+        );        
         return true;
     }
 
@@ -168,7 +171,7 @@ export class FormsService {
     }
 
     async deleteFormAssoc(assoc: FormAssoc): Promise<boolean> {
-        await this.db.poolProject.query("delete from forms_assoc where ref=$1 and form=$2", [assoc.ref, assoc.form])
+        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssoc(assoc, this.dbTables));
         return true;
     }
 
@@ -198,22 +201,22 @@ export class FormsService {
         return true;
     }
 
-    deleteFormsAssoc(ref: IndexType): Promise<boolean> {
-        return this.db.poolProject.query("delete from forms_assoc where ref=$1", [ref])
-            .then(() => true);
+    async deleteFormsAssoc(ref: IndexType): Promise<boolean> {
+        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssocRef(ref, this.dbTables));
+        return true;
     }
 
     async deleteFormsAssocs(assocs: FormAssoc[]) {
         if (!assocs?.length) {
             return false;
-        }
-        const query = format(`delete from forms_assoc where (ref,form) in (%L)`, assocs.map(elt => [elt.ref, elt.form]));
-        await this.db.poolProject.query(query);
+        }        
+        await this.db.poolProject.query(SqlDeleteBuilder.fromFormsAssoc(assocs, this.dbTables));
     }
 
-    async deleteFormsAssocIndices(ref: IndexType, indices: IndexType[]): Promise<boolean> {
-        const values = indices.map(elt => `'${elt}'`).join(',');
-        await this.db.poolProject.query(`delete from forms_assoc where ref=$1 and form=ANY(ARRAY[${values}]::text[])`, [ref]);
+    async deleteFormsAssocIndices(ref: IndexType, indices: IndexType[]): Promise<boolean> {        
+        await this.db.poolProject.query(
+            SqlDeleteBuilder.fromFormAssocIndices(ref, indices, this.dbTables)
+        );
         return true;
     }
 
@@ -235,8 +238,8 @@ export class FormsService {
     }
 
     async getFormAssocs(query: FormQuery): Promise<DbArrayRes<FormAssoc>> {
-        const sqlQuery = `select (select count(*) from forms_assoc where ref=$1) as total, 
-        ref, form from forms_assoc where ref=$1`;
+        const sqlQuery = `select (select count(*) from ${this.dbTables.assocsTableName} where ref=$1) as total, 
+        ref, form from ${this.dbTables.assocsTableName} where ref=$1`;
         const sqlLimit = query.limit > 0 ? `limit ${query.limit} offset ${query.offset}` : '';
         const res = await this.db.poolProject.query(`${sqlQuery} ${sqlLimit}`, [query.ref]);
         return {

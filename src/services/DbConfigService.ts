@@ -2,6 +2,7 @@ import { Inject, Service } from "../core/CeService";
 import {
     DB_TABLE_ACCOUNTS, DB_TABLE_ASSETS,
     DB_TABLE_FORMS, DB_TABLE_FORMSROOT,
+    DB_TABLE_FORMSROOT_ASSOC,
     DB_TABLE_FORMS_ADMIN, DB_TABLE_FORMS_ASSOC,
     DB_TABLE_FORMS_EVENT, DB_TABLE_FORMS_TOKEN,
     DB_TABLE_FORMS_VERSION, DB_TABLE_PROJECTS
@@ -71,6 +72,7 @@ export class DbConfigService {
         await this.createTableFormsAdmin();
         await this.createTableFormsRoot();
         await this.createTableFormsAssoc();
+        await this.createTableFormsRootAssoc();
         await this.createTableFormsVersion();
         await this.createTableFormsToken();
         await this.createTableFormsEvent();
@@ -82,6 +84,7 @@ export class DbConfigService {
         await this.clearTable(DB_TABLE_ASSETS);
         await this.clearTable(DB_TABLE_FORMS);
         await this.clearTable(DB_TABLE_FORMSROOT);
+        await this.clearTable(DB_TABLE_FORMSROOT_ASSOC);
         await this.clearTable(DB_TABLE_FORMS_VERSION);
         await this.clearTable(DB_TABLE_FORMS_TOKEN);
         await this.clearTable(DB_TABLE_FORMS_EVENT);
@@ -256,6 +259,20 @@ export class DbConfigService {
             `CREATE TABLE ${DB_TABLE_FORMS_ASSOC} (ref text not null, form text not null, primary key(ref, form))`,
             `create index ${DB_TABLE_FORMS_ASSOC}_ref on ${DB_TABLE_FORMS_ASSOC} using btree(ref)`,
             `create index ${DB_TABLE_FORMS_ASSOC}_form on ${DB_TABLE_FORMS_ASSOC} using btree(form)`
+        ]);
+    }
+
+    private async createTableFormsRootAssoc() {
+        const haveTable = await this.checkTable(DB_TABLE_FORMSROOT_ASSOC);
+
+        if (haveTable) {
+            return;
+        }
+
+        await this.doTransaction([
+            `CREATE TABLE ${DB_TABLE_FORMSROOT_ASSOC} (ref text not null, form text not null, primary key(ref, form))`,
+            `create index ${DB_TABLE_FORMSROOT_ASSOC}_ref on ${DB_TABLE_FORMSROOT_ASSOC} using btree(ref)`,
+            `create index ${DB_TABLE_FORMSROOT_ASSOC}_form on ${DB_TABLE_FORMSROOT_ASSOC} using btree(form)`
         ]);
     }
 

@@ -1,19 +1,17 @@
 import { FormFilter, FormQueryField, FormQueryFieldExpr, FormQueryFieldLogic, IndexType } from "@codeffekt/ce-core-data";
-import { FormQueryParserOptions } from "./FormQueryParser";
 import { SqlFromTable } from "./SqlASTTypes";
 import { SqlFromSelect } from "./SqlFromSelect";
 import { SqlSelectProcess } from "./SqlSelectProcess";
 import { SqlWhereExprElt } from "./SqlWhereExprElt";
 import { SqlWhereExprLogic } from "./SqlWhereExprLogic";
 import { SqlQueryField } from "./SqlQueryField";
+import { SqlOpOptions } from "./SqlOpOptions";
 
 function isFormQueryField(ref: string | FormQueryField): ref is FormQueryField {
     return (ref as FormQueryField).field !== undefined;
 }
 
-export interface SqlSelectBuilderOptions extends FormQueryParserOptions {
-    tableName?: string;
-}
+export type SqlSelectBuilderOptions = SqlOpOptions;
 
 interface RefFormValues {
     ref: string;
@@ -22,7 +20,7 @@ interface RefFormValues {
 
 export class SqlSelectBuilder {
 
-    constructor(private options: SqlSelectBuilderOptions = {
+    constructor(private options: SqlOpOptions = {
         formsTableName: "forms",
         formsRootTableName: "forms_root",
         assocsTableName: "forms_assoc",

@@ -15,3 +15,4 @@ export * from "./FormsQueryFacade";
 export * from './FormBlockBuilder';
 export * from "./PublicForms";
 export * from "./PublicFormsVersion";
+export * from "./PublicFormsRoot";

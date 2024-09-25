@@ -14,12 +14,16 @@ import { FormMutateFacade } from "../forms/FormMutateFacade";
 import { FormsService } from "../services/FormsService";
 import { FormUpdateFacade } from "../forms/FormUpdateFacade";
 import { FormCopyFacade } from "./FormCopyFacade";
+import { FormsRootService } from "../services/FormsRootService";
 
 @CeApiComponent()
 export class PublicForms {
 
   @Inject(FormsService)
   private readonly formsService: FormsService;
+
+  @Inject(FormsRootService)
+  private readonly formsRootService: FormsRootService;
 
   constructor() { }
 
@@ -114,7 +118,7 @@ export class PublicForms {
 
   @CeApiCall
   getFormsRootQuery(query: FormQuery): Promise<DbArrayRes<FormRoot>> {
-    return this.formsService.getFormsRootQuery(query);
+    return this.formsRootService.getFormsQuery(query);
   }
 
   @CeApiCall
