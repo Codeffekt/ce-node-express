@@ -13,6 +13,8 @@ export * from "./FormUpdateFacade";
 export * from "./FormUpgradeFacade";
 export * from "./FormsQueryFacade";
 export * from './FormBlockBuilder';
+export * from './FormCreateFromRootFacade';
+export * from './FormRootDepsBuilder';
 export * from "./PublicForms";
 export * from "./PublicFormsVersion";
 export * from "./PublicFormsRoot";

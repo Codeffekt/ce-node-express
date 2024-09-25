@@ -3,7 +3,6 @@ import {
   FormInstanceExt, FormInstance,
   DbArrayRes, FormQuery, FormMutate
 } from "@codeffekt/ce-core-data";
-import { FormCreateFacade } from "../forms/FormCreateFacade";
 import { Inject } from "../core/CeService";
 import { 
   CeApiAccountId, CeApiAdmin, 
@@ -15,6 +14,7 @@ import { FormsService } from "../services/FormsService";
 import { FormUpdateFacade } from "../forms/FormUpdateFacade";
 import { FormCopyFacade } from "./FormCopyFacade";
 import { FormsRootService } from "../services/FormsRootService";
+import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
 
 @CeApiComponent()
 export class PublicForms {
@@ -51,7 +51,7 @@ export class PublicForms {
     ROLE_CREATE)
   @CeApiBinds
   async create(@CeApiAccountId id: IndexType, root: IndexType, partialContent?: any) {
-    const creator = new FormCreateFacade();
+    const creator = new FormCreateFromRootFacade();
     return creator.createFromRoot(root, partialContent, id);    
   }  
 

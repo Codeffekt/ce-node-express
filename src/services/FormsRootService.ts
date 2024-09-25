@@ -27,6 +27,11 @@ export class FormsRootService {
     constructor() {
     }
 
+    getFormRoot(id: IndexType): Promise<FormRoot> {
+        return this.db.getCachedFormsRoot()
+            .then(root => root.find(elt => elt.id === id));
+    }
+
     getFormsQuery(query: FormQuery): Promise<DbArrayRes<FormRoot>> {
         const queryProcess = new FormsQueryProcess();
         return queryProcess.execute({ ...query, extMode: false }, this.dbTables);

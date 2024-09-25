@@ -311,7 +311,95 @@ export class Roots {
                     "defaultValue": {}
                 }
             }
-        }
+        },
+        {
+            "id": "forms-space-editor-node-layout",
+            "ctime": 1727255331706,
+            "title": "forms-space-editor-node-layout",
+            "content": {
+              "id": {
+                "field": "id",
+                "type": "text",
+                "label": "Id",                
+              },
+              "coords": {
+                "field": "coords",
+                "type": "object",
+                "label": "Coords",
+                "defaultValue": {
+                    x: 0,
+                    y: 0
+                }
+              }
+            }
+          },
+          {
+            "id": "forms-space-editor-layout",
+            "ctime": 1727255433029,
+            "title": "forms-space-editor-layout",
+            "content": {
+              "nodes": {
+                "field": "nodes",
+                "type": "formArray",
+                "label": "Nodes",                
+                "root": "forms-space-editor-node-layout",
+                "params": {
+                  "fields": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "forms-space-editor-format-context",
+            "ctime": 1727255488759,
+            "title": "forms-space-editor-format-context",
+            "content": {
+              "name": {
+                "field": "name",
+                "type": "text",
+                "label": "Name",               
+              },
+              "version": {
+                "field": "version",
+                "type": "text",
+                "label": "Version",                
+              }
+            }
+          },
+          {
+            "id": "forms-space-editor-format",
+            "ctime": 1727255536126,
+            "title": "forms-space-editor-format",
+            "content": {
+              "context": {
+                "field": "context",
+                "type": "index",
+                "label": "Context",               
+                "root": "forms-space-editor-format-context",
+                "required": true,
+                "params": {
+                  "fields": [
+                    "name",
+                    "version"
+                  ]
+                }
+              },
+              "forms": {
+                "field": "forms",
+                "type": "rootArray",
+                "label": "Forms",               
+              },
+              "layout": {
+                "field": "layout",
+                "type": "index",
+                "label": "Layout",                
+                "root": "forms-space-editor-layout",
+                "required": true
+              }
+            }
+          },        
     ];
 
 }

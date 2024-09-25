@@ -20,7 +20,7 @@ async function bootstrap() {
             account: process.env.CE_FORMS_ACCOUNT,
             passwd: process.env.CE_FORMS_PASSWD,
         },
-        clearTables: true
+        clearTables: true,
     });
     await SimpleDBApp.close();
 }

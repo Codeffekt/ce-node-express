@@ -4,10 +4,11 @@ import {
     FormSpaceEditorFormatContextWrapper, 
     FormSpaceEditorFormatWrapper, 
     FormSpaceEditorLayoutWrapper, 
+    FormSpaceEditorNodeLayoutWrapper, 
     IndexType,
     SpacesEditorFormat,
     SpacesEditorFormatContext,
-    SpacesEditorLayoutConfig,     
+    SpacesEditorLayout,     
     
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
@@ -23,8 +24,9 @@ export class SpacesEditorFormatBuilder {
     private readonly formsRootService: FormsRootService;
 
     private projectForm: FormSpaceEditorFormatWrapper;
+    private layoutForm: FormSpaceEditorLayoutWrapper;
     private roots: FormRoot[];
-    private nodes: FormSpaceEditorLayoutWrapper[];
+    private nodes: FormSpaceEditorNodeLayoutWrapper[];
 
     private constructor(private pid: IndexType) {}
 
@@ -35,6 +37,8 @@ export class SpacesEditorFormatBuilder {
         await builder.retrieveProject();
         
         await builder.retrieveRoots();
+
+        await builder.retrieveLayout();
 
         await builder.retrieveNodes();
 
@@ -66,20 +70,33 @@ export class SpacesEditorFormatBuilder {
         this.roots = elts.elts;
     }
 
+    async retrieveLayout() {        
+
+        const layoutForm = 
+            this.projectForm.getInstanceFromField("layout");
+
+        if(!layoutForm) {
+            throw new EltNotFoundError(`Project layout not found`, this.pid);
+        }
+
+        this.layoutForm = new FormSpaceEditorLayoutWrapper(layoutForm);
+
+    }
+
     async retrieveNodes() {
 
         const elts = await this.formsService.getFormsQuery({
             limit: 0,
-            ref: this.projectForm.getNodesRef()
+            ref: this.layoutForm.getNodesRef()
         });
 
-        this.nodes = elts.elts.map(elt => new FormSpaceEditorLayoutWrapper(elt));
+        this.nodes = elts.elts.map(elt => new FormSpaceEditorNodeLayoutWrapper(elt));
     }
 
-    getContext(): SpacesEditorFormatContext {
+    getContext(): SpacesEditorFormatContext {        
 
         const contextForm = 
-            this.projectForm.getInstanceFromField(this.projectForm.props.context);
+            this.projectForm.getInstanceFromField("context");
 
         if(!contextForm) {
             throw new EltNotFoundError(`Project context not found`, this.pid);
@@ -88,9 +105,11 @@ export class SpacesEditorFormatBuilder {
         const contextFormWrapper = new FormSpaceEditorFormatContextWrapper(contextForm);
 
         return {
+            name: "Untitled",
             ctime: contextForm.ctime,
-            mtime: contextForm.mtime,
+            mtime: contextForm.mtime ?? contextForm.ctime,
             author: contextForm.author,
+            version: "NA",
             ...contextFormWrapper.props
         };
     }
@@ -99,7 +118,7 @@ export class SpacesEditorFormatBuilder {
         return this.roots;
     }
 
-    getLayoutConfig(): SpacesEditorLayoutConfig {
+    getLayoutConfig(): SpacesEditorLayout {
         return {
             nodes: this.nodes.map(node => node.props),
         };
