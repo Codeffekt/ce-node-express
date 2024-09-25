@@ -1,3 +1,5 @@
+## [1.11.0] - Add space code editor API
+
 ## [1.10.1] - Add API for forms root
 
 ## [0.0.25] - Support for old token version with login instead of uid

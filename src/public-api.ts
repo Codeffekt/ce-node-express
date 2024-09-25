@@ -18,3 +18,4 @@ export * from './forms';
 export * from './account';
 export * from './project';
 export * from './processing';
+export * from './spaces-editor';

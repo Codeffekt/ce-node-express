@@ -12,6 +12,7 @@ import { PublicFormsVersion } from "../forms/PublicFormsVersion";
 import { PublicFormsApiToken } from "../tokens/PublicFormsApiToken";
 import { PublicProcessing } from "../processing/PublicProcessing";
 import { PublicFormsRoot } from "../forms/PublicFormsRoot";
+import { PublicSpacesEditor } from "../forms/PublicSpacesEditor";
 
 @Service()
 @Controller({ path: '/api/' })
@@ -24,7 +25,8 @@ import { PublicFormsRoot } from "../forms/PublicFormsRoot";
         PublicFormsRoot,
         PublicFormsVersion,
         PublicFormsApiToken,
-        PublicProcessing,       
+        PublicProcessing,
+        PublicSpacesEditor,       
     ]
 })
 export class FormsApiServer {
