@@ -1,7 +1,8 @@
 import {
     EltNotFoundError, FormAssoc, FormSpaceEditorFormatWrapper,
     FormSpaceEditorLayoutWrapper, FormSpaceEditorNodeLayout,
-    FormWrapper, IndexType, SpacesEditorFormat
+    FormUtils,
+    FormWrapper, IncorrectFormatError, IndexType, SpacesEditorFormat
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
@@ -72,6 +73,14 @@ export class SpacesEditorFormatUpdater {
         }
 
         FormWrapper.setFormValues(this.format.context, contextForm);
+
+        const entryPointBlock = FormUtils.getBlockFromField(contextForm, "entryPoint");
+
+        if(!entryPointBlock) {
+            throw new IncorrectFormatError(`Project entry point not found`);
+        }
+
+        entryPointBlock.root = this.format.context.entryPoint;
 
         await this.formsService.updateForm(contextForm, this.author);
     }

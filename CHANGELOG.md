@@ -1,3 +1,5 @@
+## [1.11.1] - Add entry point in form editor context
+
 ## [1.11.0] - Add space code editor API
 
 ## [1.10.1] - Add API for forms root

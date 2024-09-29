@@ -365,6 +365,17 @@ export class Roots {
                 "field": "version",
                 "type": "text",
                 "label": "Version",                
+              },
+              "entryPoint": {
+                "field": "entryPoint",
+                "type": "formArray",
+                "label": "entryPoint",
+                "params": {
+                  "fields": [
+                    "$id",
+                    "$ctime",
+                  ]
+                }                
               }
             }
           },

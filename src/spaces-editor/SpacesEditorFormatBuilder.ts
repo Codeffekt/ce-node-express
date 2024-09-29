@@ -5,6 +5,8 @@ import {
     FormSpaceEditorFormatWrapper, 
     FormSpaceEditorLayoutWrapper, 
     FormSpaceEditorNodeLayoutWrapper, 
+    FormUtils, 
+    IncorrectFormatError, 
     IndexType,
     SpacesEditorFormat,
     SpacesEditorFormatContext,
@@ -104,13 +106,20 @@ export class SpacesEditorFormatBuilder {
 
         const contextFormWrapper = new FormSpaceEditorFormatContextWrapper(contextForm);
 
+        const entryPointBlock = FormUtils.getBlockFromField(contextFormWrapper.core, "entryPoint");
+        
+        if(!entryPointBlock) {
+            throw new IncorrectFormatError(`Entry point block does not exists for project ${this.pid}`);
+        }
+
         return {
             name: "Untitled",
             ctime: contextForm.ctime,
             mtime: contextForm.mtime ?? contextForm.ctime,
             author: contextForm.author,
             version: "NA",
-            ...contextFormWrapper.props
+            ...contextFormWrapper.props,
+            entryPoint: entryPointBlock.root,
         };
     }
 
