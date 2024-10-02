@@ -14,6 +14,7 @@ import { FormUpgradeFacade } from "./FormUpgradeFacade";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 import { FormUpdateFacade } from "./FormUpdateFacade";
+import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
 
 export class FormMutateFacade {
 
@@ -81,8 +82,8 @@ export class FormMutateFacade {
                     FormWrapper.setFormValues(elt.props, form);
                 }
             }) : [];
-        const formBuilder = new FormCreateFacade(actors);
-        return formBuilder.create(this.pid, this.creatorId, this.mutation.author);
+        const formBuilder = new FormCreateFromRootFacade(actors);
+        return formBuilder.createFromRoot(this.root.id, this.mutation.author);
     }
 
     private async executeFormDelete() {
@@ -92,7 +93,7 @@ export class FormMutateFacade {
         await this.createRoot();
 
         const formDelete = new FormDeleteFacade(this.mutation.fields?.includes, this.mutation.fields?.excludes);
-        return formDelete.execute(this.pid, this.creatorId, this.mutation.indices[0]);
+        return formDelete.execute(this.mutation.indices[0]);
     }
 
     private async executeFormArrayCreation() {

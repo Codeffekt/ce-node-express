@@ -1,7 +1,7 @@
 import {
     FormInstanceBase, FormBlock,
     FormInstance, IndexType,
-    EltNotFoundError, IncorrectFormatError, FormWrapper, FormUtils
+    EltNotFoundError, IncorrectFormatError, FormUtils
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
@@ -27,7 +27,7 @@ export class FormArrayCreateFacade {
         return this.formElt;
     }
 
-    private async retrieveForm() {
+    private async retrieveForm() {        
         this.form = await this.formsService.getForm(this.id);
     }
 
@@ -39,11 +39,11 @@ export class FormArrayCreateFacade {
             throw new EltNotFoundError(`Block ${this.arrayField} does not exist`, this.arrayField);
         }
 
-        if (this.arrayBlock.type !== 'formArray' || !this.arrayBlock.root || !this.arrayBlock.index) {
+        if (this.arrayBlock.type !== 'formArray' || !this.arrayBlock.root) {
             throw new IncorrectFormatError(`Block ${this.arrayField} does not have sufficiant parameters`, this.arrayBlock);
         }
 
-        this.root = await this.formsService.getFormRoot(this.arrayBlock.root);
+        this.root = await this.formsService.getFormRoot(this.arrayBlock.root);       
     }
 
     private async createFormArrayElt() {
@@ -56,8 +56,11 @@ export class FormArrayCreateFacade {
         this.formElt = await formMutate.execute() as FormInstance;
     }
 
-    private async updateForm(author: IndexType) {
-        FormWrapper.setFormValue(this.arrayBlock.index, this.form.id, this.formElt);
+    private async updateForm(author: IndexType) {        
+        await this.formsService.insertFormAssoc({
+            ref: this.arrayBlock.params?.ref ?? FormUtils.createFormAssocRef(this.form.id, this.arrayBlock.field),
+            form: this.formElt.id,
+        });
         await this.formsService.updateForm(this.formElt, author);
     }
 }

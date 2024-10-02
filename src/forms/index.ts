@@ -8,6 +8,7 @@ export * from "./FormForkFacade";
 export * from "./FormMutateFacade";
 export * from './FormMutatesFacade';
 export * from "./FormQueryBaseFacade";
+export * from "./FormCreatorActor";
 export * from "./FormQueryFacade";
 export * from "./FormUpdateFacade";
 export * from "./FormUpgradeFacade";

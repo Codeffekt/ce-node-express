@@ -15,6 +15,7 @@ import { FormUpdateFacade } from "../forms/FormUpdateFacade";
 import { FormCopyFacade } from "./FormCopyFacade";
 import { FormsRootService } from "../services/FormsRootService";
 import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
+import { FormCreatorBuilder } from "./FormCreatorActor";
 
 @CeApiComponent()
 export class PublicForms {
@@ -51,8 +52,7 @@ export class PublicForms {
     ROLE_CREATE)
   @CeApiBinds
   async create(@CeApiAccountId id: IndexType, root: IndexType, partialContent?: any) {
-    const creator = new FormCreateFromRootFacade();
-    return creator.createFromRoot(root, partialContent, id);    
+    return FormCreateFromRootFacade.fromPartialContent(root, id, partialContent);
   }  
 
   @CeApiCall

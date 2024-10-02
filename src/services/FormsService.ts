@@ -206,6 +206,11 @@ export class FormsService {
         return true;
     }
 
+    async deleteFormsAssocFromForm(form: IndexType): Promise<boolean> {
+        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssocForm(form, this.dbTables));
+        return true;
+    }
+
     async deleteFormsAssocs(assocs: FormAssoc[]) {
         if (!assocs?.length) {
             return false;

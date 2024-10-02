@@ -1,27 +1,19 @@
 import {
     IndexType,
     FormInstance,
-    getProjectCreator, EltNotFoundError,
+    EltNotFoundError,
     FormUtils, FormAssoc, FormBlock
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
-import { ProjectsService } from "../services/ProjectsService";
 import { ForkFieldsUtils } from "./ForkFieldsUtils";
 
-const ARRAY_DELETE_FORMS_LIMIT = 100;
-
-export class FormDeleteFacade {
-
-    @Inject(ProjectsService)
-    private readonly projectsService: ProjectsService;
+export class FormDeleteFacade {   
 
     @Inject(FormsService)
     private readonly formsService: FormsService;
 
-    private id: IndexType;
-    private project: FormInstance;
-    private creator: FormBlock;
+    private id: IndexType;    
     private form: FormInstance;
 
     private deletedAssocs: FormAssoc[] = [];
@@ -29,25 +21,21 @@ export class FormDeleteFacade {
 
     constructor(private includesFields?: IndexType[], private excludesFields?: IndexType[]) { }
 
-    async execute(pid: IndexType, creatorId: IndexType, id: IndexType) {
+    async execute(id: IndexType) {
 
-        await this.init(pid, creatorId, id);
+        await this.init(id);
         await this.retrieveForm();
-        await this.deleteArrayFields();
-        await this.deleteFormFromProject();
+        await this.deleteArrayFields();       
         await this.deleteSubForms();
-
-        await this.formsService.deleteFormsAssocs(this.deletedAssocs);
-        await this.formsService.deleteForms(this.deletedFormIds);
+        await this.deleteFormsAssocs();    
+        await this.deleteForms();
 
         return true;
 
     }
 
-    private async init(pid: IndexType, creatorId: IndexType, id: IndexType) {
-        this.id = id;
-        this.project = await this.projectsService.getProject(pid);
-        this.creator = getProjectCreator(this.project, creatorId);
+    private async init(id: IndexType) {
+        this.id = id;      
         this.deletedAssocs = [];
         this.deletedFormIds = [];
     }
@@ -56,13 +44,9 @@ export class FormDeleteFacade {
         this.form = await this.formsService.getForm(this.id);
 
         if (!this.form) {
-            throw new EltNotFoundError(`Cannot find form ${this.id}`, { pid: this.project.id, id: this.id });
+            throw new EltNotFoundError(`Cannot find form ${this.id}`, { id: this.id });
         }
-    }
-
-    private async deleteFormFromProject() {
-        this.deletedAssocs.push({ ref: this.creator.params.ref, form: this.form.id });
-    }
+    }   
 
     private async deleteSubForms() {
         const cascadeFormsFields = this.formsService.getRequiredFormsFromRoot(this.form).map(b => b.field);
@@ -95,23 +79,21 @@ export class FormDeleteFacade {
         }
     }
 
-    private async deleteArray(block: FormBlock) {
+    private async deleteArray(block: FormBlock) {        
+        if(block.params.ref) {
+            return;
+        }
 
-        await this.formsService.deleteFormsQuery({
-            queryRootFields: [{
-                field: 'root',
-                op: '=',
-                value: block.root
-            }],
-            queryFields: [{
-                op: "=",
-                field: block.index,
-                value: this.form.id,
-            }],
-            offset: 0,
-            limit: ARRAY_DELETE_FORMS_LIMIT
-        });
+        const ref = FormUtils.createFormAssocRef(this.id, block.field);
+        await this.formsService.deleteFormsAssoc(ref);
+    }
 
-        // TODO: support for sub fields
+    private async deleteFormsAssocs() {
+        await this.formsService.deleteFormsAssocs(this.deletedAssocs);
+        await this.formsService.deleteFormsAssocFromForm(this.id);
+    }
+
+    private async deleteForms() {
+        await this.formsService.deleteForms(this.deletedFormIds);
     }
 }

@@ -2,40 +2,53 @@ import { EltNotFoundError, FormAssoc, FormInstance, FormUtils, FormWrapper, Inde
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 import { FormTemplateBuilder } from "./template/FormTemplateBuilder";
+import { FormCreateActor, FormCreatorBuilder } from "./FormCreatorActor";
 
 export class FormCreateFromRootFacade {
 
     @Inject(FormsService)
-    private readonly formsService: FormsService;   
+    private readonly formsService: FormsService;
 
     private newForms: FormInstance[] = [];
     private newAssocs: FormAssoc[] = [];
     private form: FormInstance;
 
-    constructor() {
+    constructor(private actors: FormCreateActor[] = []) {
 
     }
 
-    async createFromRoot(root: IndexType, partialContent: any, author: IndexType): Promise<FormInstance> {
-        await this.createWrapper(root, partialContent, author);
-        await this.createRequiredSubForms(author);
-        await this.insertRequiredSubForms(author);
-        await this.addFormsToAssoc();
+    static fromPartialContent(root: IndexType, author: IndexType, partialContent?: any) {
+        const creator = new FormCreateFromRootFacade(
+            partialContent ? [ FormCreatorBuilder.fromPartialContent(root, partialContent) ] : [] 
+          );
+        return creator.createFromRoot(root, author);
+    }
+
+    async createFromRoot(root: IndexType, author: IndexType): Promise<FormInstance> {
+        try {
+            await this.createWrapper(root, author);
+            await this.createRequiredSubForms(author);
+            this.applyActors();
+            await this.insertRequiredSubForms(author);            
+            await this.addFormsToAssoc();
+        } catch(err) {
+            console.error(err);
+        }
 
         return this.form;
     }
 
-    private async createWrapper(root: IndexType, partialContent: any, authorId: IndexType) {
+    private async createWrapper(root: IndexType, authorId: IndexType) {
         const formRoot = await this.formsService.getFormRoot(root);
         if (!formRoot) {
             throw new EltNotFoundError(`Cannot create form, form root ${root} not found`, { root });
         }
         const builder = new FormTemplateBuilder();
-        this.form = builder.fromFormRoot(formRoot, partialContent, authorId);    
+        this.form = builder.fromFormRoot(formRoot, undefined, authorId);
     }
 
     private async insertRequiredSubForms(author?: IndexType) {
-        if (this.newForms && this.newForms.length) {            
+        if (this.newForms && this.newForms.length) {
             await this.formsService.insertForms(this.newForms, author);
         }
     }
@@ -64,16 +77,26 @@ export class FormCreateFromRootFacade {
             }
 
             this.newForms.push(form);
-            this.newAssocs = [{ ref: this.form.id, form: form.id }];           
+            this.newAssocs = [{ ref: this.form.id, form: form.id }];
 
             FormWrapper.setFormValue(block.field, form.id, this.form);
         }
-    }    
+    }
+
+    private applyActors() {
+        if (this.actors?.length && this.newForms?.length) {
+            for (const actorFunction of this.actors) {
+                for (const newForm of this.newForms) {
+                    actorFunction(newForm);
+                }
+            }
+        }
+    }
 
     private setSubFormFieldParentIndex(field: IndexType, parentIndex: IndexType, subForm: FormInstance) {
         const block = FormUtils.getBlockFromField(subForm, field);
         if (FormUtils.isBlockIndex(block)) {
             FormWrapper.setFormValue(field, parentIndex, subForm);
         }
-    }   
+    }
 }

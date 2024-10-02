@@ -8,8 +8,9 @@ import { FormsCreationResult } from "../core/core";
 import { FormsService } from "../services/FormsService";
 import { ProjectsService } from "../services/ProjectsService";
 import { FormTemplateBuilder } from "./template/FormTemplateBuilder";
+import { FormCreateActor } from "./FormCreatorActor";
 
-export type FormCreateActor = (newForm: FormInstance) => void;
+
 export class FormCreateFacade {
 
     @Inject(ProjectsService)

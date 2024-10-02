@@ -44,7 +44,7 @@ export class ForkFieldsUtils {
 
     static getPredicateArray() {
         return (block: FormBlock) => (
-            (block.type === "formArray") && (block.root) && (block.index)
+            (block.type === "formArray") && (block.root)
         );
     }
 

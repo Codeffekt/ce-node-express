@@ -1,7 +1,7 @@
 import { FormsService } from "../services/FormsService";
 import { Inject } from "../core/CeService";
-import { FormCreateActor } from "./FormCreateFacade";
 import { FormInstance } from "@codeffekt/ce-core-data";
+import { FormCreateActor } from "./FormCreatorActor";
 
 export class FormCreateOnAccountFacade {
 

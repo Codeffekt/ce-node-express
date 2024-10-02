@@ -205,8 +205,9 @@ export class PublicProject {
     @CeApiCall
     @CeApiRole(ROLE_CREATE)
     async deleteForm(pid: IndexType, creator: IndexType, id: IndexType): Promise<boolean> {
-        const formDeleteFacade = new FormDeleteFacade();
-        return formDeleteFacade.execute(pid, creator, id);
+        // const formDeleteFacade = new FormDeleteFacade();
+        // return formDeleteFacade.execute(pid, creator, id);
+        throw new Error("Operation not supported");
     }
 
     @CeApiCall

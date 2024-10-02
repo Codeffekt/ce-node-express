@@ -21,6 +21,11 @@ export class SqlDeleteBuilder {
             `delete from ${options.assocsTableName} where ref=%L`, ref);
     }
 
+    static fromFormAssocForm(form: IndexType, options: DbTablesOption) {
+        return format(
+            `delete from ${options.assocsTableName} where form=%L`, form);
+    }
+
     static fromFormAssocIndices(ref: IndexType, indices: IndexType[], options: DbTablesOption) {
         const values = indices.map(elt => `'${elt}'`).join(',');
         return format(`delete from forms_assoc where ref=%L and form=ANY(ARRAY[${values}]::text[])`, 
