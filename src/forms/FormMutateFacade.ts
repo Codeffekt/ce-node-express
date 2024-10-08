@@ -15,11 +15,13 @@ import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 import { FormUpdateFacade } from "./FormUpdateFacade";
 import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
+import { FormCreatorBuilder } from "./FormCreatorActor";
+import { FormFactoryCreateFacade } from "./FormFactoryCreateFacade";
 
 export class FormMutateFacade {
 
     @Inject(FormsService)
-    private readonly formsService: FormsService;    
+    private readonly formsService: FormsService;
 
     private root: FormInstanceBase;
     private creatorId: IndexType;
@@ -35,6 +37,8 @@ export class FormMutateFacade {
             return this.executeOnTypeFormArray();
         } else if (this.mutation.type === "formAssoc") {
             return this.executeOnTypeFormAssoc();
+        } else if (this.mutation.type === "factory") {
+            return this.executeOnTypeFactory();
         } else {
             throw new IncorrectFormatError(`Invalid mutation type ${this.mutation.type}`);
         }
@@ -53,6 +57,14 @@ export class FormMutateFacade {
             return this.executeFormUpgrade();
         } else {
             throw new IncorrectFormatError(`Invalid mutation op ${this.mutation.op} on type form`);
+        }
+    }
+
+    private executeOnTypeFactory() {
+        if (this.mutation.op === "create") {
+            return this.executeFactoryCreation();
+        } else {
+            throw new IncorrectFormatError(`Invalid mutation op ${this.mutation.op} on type factory`);
         }
     }
 
@@ -77,13 +89,21 @@ export class FormMutateFacade {
     private async executeFormCreation() {
         await this.createRoot();
         const actors = this.mutation.props?.length ?
-            this.mutation.props.map((elt) => (form: FormInstance) => {
-                if (form.root === elt.root) {
-                    FormWrapper.setFormValues(elt.props, form);
-                }
-            }) : [];
+            FormCreatorBuilder.fromPreFilledProps(this.mutation.props) : [];
         const formBuilder = new FormCreateFromRootFacade(actors);
         return formBuilder.createFromRoot(this.root.id, this.mutation.author);
+    }
+
+    private async executeFactoryCreation() {
+        await this.checkIndices();
+        await this.checkEltField();
+        const actors = this.mutation.props?.length ?
+            FormCreatorBuilder.fromPreFilledProps(this.mutation.props) : [];
+        const factory = new FormFactoryCreateFacade(actors);
+        return factory.createFromFormBlock(
+            this.mutation.indices[0],
+            this.mutation.formEltField,
+            this.mutation.author);
     }
 
     private async executeFormDelete() {
@@ -169,6 +189,12 @@ export class FormMutateFacade {
         }
     }
 
+    private checkEltField() {
+        if (!this.mutation.formEltField) {
+            throw new InvalidParamError(`Mutation does not have formEltfield`);
+        }
+    }
+
     private checkRefField() {
         if (!this.mutation.ref) {
             throw new InvalidParamError(`Mutation does not have ref`);
@@ -176,7 +202,7 @@ export class FormMutateFacade {
     }
 
     private async createRoot(options: { checkTable: boolean } = { checkTable: true }) {
-        if(this.mutation.rootField) {
+        if (this.mutation.rootField) {
             await this.createRootWithRootField();
         } else {
             await this.createRootWithTable(options);
@@ -208,7 +234,7 @@ export class FormMutateFacade {
 
         const project = await this.formsService.getForm(this.pid);
 
-        if(!project) {
+        if (!project) {
             throw new EltNotFoundError(`Form (project) ${this.pid} not found`, this.pid);
         }
 

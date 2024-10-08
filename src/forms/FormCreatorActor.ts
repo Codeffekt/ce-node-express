@@ -1,5 +1,6 @@
 import {
     FormInstance, 
+    FormPreFilledProps, 
     FormWrapper, IndexType
 } from "@codeffekt/ce-core-data";
 
@@ -15,4 +16,11 @@ export class FormCreatorBuilder {
         }
     }
 
+    static fromPreFilledProps(props: FormPreFilledProps[]): FormCreateActor[] {
+        return props.map((elt) => (form: FormInstance) => {
+            if (form.root === elt.root) {
+                FormWrapper.setFormValues(elt.props, form);
+            }
+        });
+    }
 }
