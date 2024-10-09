@@ -55,7 +55,7 @@
     "axios": "^0.25.0"
   },
   "devDependencies": {
-    "@codeffekt/ce-core-data": "^1.1.9",
+    "@codeffekt/ce-core-data": "^1.2.0",
     "@codeffekt/ce-events-data": "^1.1.0",
     "@types/bcrypt": "^3.0.0",
     "@types/chalk": "^2.2.0",
