@@ -25,7 +25,7 @@ import { PublicSpacesEditor } from "../forms/PublicSpacesEditor";
         PublicFormsRoot,
         PublicFormsVersion,
         PublicFormsApiToken,
-        PublicProcessing,
+        PublicProcessing,        
         PublicSpacesEditor,       
     ]
 })
