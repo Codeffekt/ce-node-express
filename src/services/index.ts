@@ -13,3 +13,4 @@ export * from './RemoteApiService';
 export * from './FormsApiTokensService';
 export * from './CeFormsInitService';
 export * from './ProcessingService';
+export * from './WorkerModuleService';

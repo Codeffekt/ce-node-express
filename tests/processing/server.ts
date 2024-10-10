@@ -15,7 +15,8 @@ async function bootstrap() {
     CeService.get(ProcessingApplication).runAppFromEnv({
         task: new Task("../../tests/processing/task.ts"),
         server: "http://localhost:3000",
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjZS1mb3Jtcy1hcGkiLCJzdWIiOiJjb250YWN0QGNvZGVmZmVrdC5jb20iLCJ1aWQiOiJlNjZlNzViYS1jY2VlLTQxYWYtYTdmNC05NGVjYTIwNTgyMWEiLCJleHAiOjg1NTU1NDU2MzcsImlhdCI6MTcxMjIzMzYzN30.QOWwCy8LbQOduAN8IC-EGoBjY7oLpTcozy715oJHRHY"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJjZS1mb3Jtcy1hcGkiLCJzdWIiOiJjb250YWN0QGNvZGVmZmVrdC5jb20iLCJ1aWQiOiJlNjZlNzViYS1jY2VlLTQxYWYtYTdmNC05NGVjYTIwNTgyMWEiLCJleHAiOjg1NTU1NDU2MzcsImlhdCI6MTcxMjIzMzYzN30.QOWwCy8LbQOduAN8IC-EGoBjY7oLpTcozy715oJHRHY",
+        workerModulePath: "./ce-node-worker.cjs",
     });    
 }
 

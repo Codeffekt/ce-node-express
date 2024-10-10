@@ -1,3 +1,5 @@
+## [1.12.1] - Add worker module service
+
 ## [1.12.0] - Add Factory mutation
 
 ## [1.11.1] - Add entry point in form editor context

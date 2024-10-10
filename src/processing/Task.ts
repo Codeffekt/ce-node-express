@@ -1,7 +1,12 @@
-import { FormInstanceExt, FormWrapper, IndexType, Processing, ProcessingMsg, ProcessingStatus } from '@codeffekt/ce-core-data';
+import {
+    FormInstanceExt, FormWrapper,
+    IndexType, Processing,
+    ProcessingMsg, ProcessingStatus
+} from '@codeffekt/ce-core-data';
 import { Worker } from 'worker_threads';
 import { Inject } from '../core/CeService';
 import { RemoteApiService } from '../services/RemoteApiService';
+import { WorkerModuleService } from '../services/WorkerModuleService';
 
 export class Task {
 
@@ -10,6 +15,9 @@ export class Task {
 
     @Inject(RemoteApiService)
     private readonly remoteApiService: RemoteApiService;
+
+    @Inject(WorkerModuleService)
+    private readonly workerModuleService: WorkerModuleService;
 
     constructor(private taskFile: string) {
     }
@@ -20,7 +28,7 @@ export class Task {
 
         await this.updateProcessingStatus("RUNNING");
 
-        this.worker = new Worker('./src/processing/worker.js', {
+        this.worker = new Worker(this.workerModuleService.getWorkerModulePath(), {
             workerData: {
                 context: {
                     processing,
@@ -73,10 +81,10 @@ export class Task {
     private async processMessage(message: ProcessingMsg) {
         console.log("Receive message", message);
         await this.updateForm(message.data);
-        if (message.type === "DONE" || message.type === "ERROR") {            
+        if (message.type === "DONE" || message.type === "ERROR") {
             this.worker.terminate();
-        } 
-        
+        }
+
     }
 
     private clearProcessing() {

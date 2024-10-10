@@ -5,11 +5,13 @@ import { Controller, ExpressRouter, Get } from "../express-router/ExpressRouter"
 import { Task } from "../processing/Task";
 import { RemoteApiService } from "../services/RemoteApiService";
 import { FormInstanceExt, IndexType } from "@codeffekt/ce-core-data";
+import { WorkerModuleService } from "../services/WorkerModuleService";
 
 export interface ProcessingApplicationConfig {
     task: Task;
     server?: string;
     token?: string;
+    workerModulePath: string;
 }
 
 @Service()
@@ -23,6 +25,9 @@ export class ProcessingApplication {
     @Inject(RemoteApiService)
     private readonly remoteApiService: RemoteApiService;
 
+    @Inject(WorkerModuleService)
+    private readonly workerModuleService: WorkerModuleService;
+
     constructor() { }
 
     setConfig(config: ProcessingApplicationConfig) {
@@ -34,6 +39,8 @@ export class ProcessingApplication {
         this.config = config;
 
         this.initRemoteApi();
+
+        this.initWorkerModule();
 
         this.app = express();
 
@@ -117,6 +124,12 @@ export class ProcessingApplication {
             server: this.config.server ?? process.env.CE_FORMS_BASE_URL,
             learning: null,
             token: this.config.token ?? process.env.CE_FORMS_TOKEN,
+        });
+    }
+
+    private initWorkerModule() {
+        this.workerModuleService.setConfig({
+            workerModulePath: this.config.workerModulePath
         });
     }
 
