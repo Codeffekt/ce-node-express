@@ -15,7 +15,6 @@ import { FormUpdateFacade } from "../forms/FormUpdateFacade";
 import { FormCopyFacade } from "./FormCopyFacade";
 import { FormsRootService } from "../services/FormsRootService";
 import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
-import { FormCreatorBuilder } from "./FormCreatorActor";
 
 @CeApiComponent()
 export class PublicForms {

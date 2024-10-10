@@ -1,6 +1,6 @@
 import {
     DbArrayRes, FormInstance,
-    FormInstanceExt, FormQuery,
+    FormInstanceExt, FormMutate, FormQuery,
     FormRoot, IndexType,
 } from "@codeffekt/ce-core-data";
 import Axios, { AxiosRequestConfig } from "axios";
@@ -33,6 +33,10 @@ export class RemoteApiService {
         this.config = config;
     }
 
+    getConfig() {
+        return this.config;
+    }
+
     async self() {
         const res = await Axios.get(
             this.getSelf(),
@@ -51,6 +55,10 @@ export class RemoteApiService {
 
     callForms(func: string, ...params: any[]): Promise<any> {
         return this.call.apply(this, ["PublicForms", func].concat(params));
+    }
+
+    callFormsRoot(func: string, ...params: any[]): Promise<any> {
+        return this.call.apply(this, ["PublicFormsRoot", func].concat(params));
     }
 
     callAccounts(func: string, ...params: any[]): Promise<any> {
@@ -81,8 +89,16 @@ export class RemoteApiService {
         return this.callForms("getRoot", rid);
     }
 
+    getFormsRootQuery(query: FormQuery): Promise<DbArrayRes<FormRoot>> {
+        return this.callFormsRoot("getFormsQuery", query);
+    }
+
     updateForm(formInstance: FormInstance): Promise<any> {
         return this.callForms("update", formInstance);
+    }
+
+    formMutation(mutation: FormMutate): Promise<boolean> {
+        return this.callForms("formMutation", mutation);
     }
 
     callLearningProcess(pid: IndexType, sid: IndexType) {

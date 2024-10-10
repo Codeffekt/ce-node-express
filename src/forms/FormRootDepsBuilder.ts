@@ -11,18 +11,14 @@ export class FormRootDepsBuilder {
 
     static fromRoot(root: IndexType) {
 
-        const builder = new FormRootDepsBuilder(root);
-
-        console.log("fromRoot", root);
+        const builder = new FormRootDepsBuilder(root);        
 
         return builder.getFormWithDeps();
     }
 
     private async getFormWithDeps(): Promise<DbArrayRes<FormRoot>> {
 
-        const formRoot = await this.formsService.getFormRoot(this.root);
-
-        console.log("getFormWithDeps", formRoot);
+        const formRoot = await this.formsService.getFormRoot(this.root);        
 
         const elts = await this.findFormDeps(formRoot, [ formRoot ]);
 
@@ -38,9 +34,7 @@ export class FormRootDepsBuilder {
         const elts = FormUtils.getBlocks(root)
             .filter(block => FormUtils.isBlockFormArray(block) || FormUtils.isBlockIndex(block))
             .filter(block => block.root !== undefined && !curList.find(elt => elt.id === block.root))
-            .map(block => block.root!);
-
-        console.log("findFormDeps", elts, root, curList);
+            .map(block => block.root!);        
 
         const res = await this.formsService.getFormsQuery({
             indices: elts
