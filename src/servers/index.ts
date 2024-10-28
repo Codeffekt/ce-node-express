@@ -6,3 +6,4 @@ export * from './GisDatabase';
 export * from './AssetsApiServer';
 export * from './FormsApiServer';
 export * from './ProcessingApplication';
+export * from './EventsApiServer';

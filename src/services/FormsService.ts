@@ -97,9 +97,9 @@ export class FormsService {
         return queryProcess.execute(query);
     }
 
-    async getFormQuery(id: IndexType, query: FormQuery): Promise<FormInstance | FormInstanceExt> {
+    async getFormQuery(id: IndexType, query?: FormQuery): Promise<FormInstance | FormInstanceExt> {
 
-        const extMode = query.extMode ? await this.formHaveIndexBlock(id) : undefined;
+        const extMode = query?.extMode ? await this.formHaveIndexBlock(id) : undefined;
 
         const res = await this.getFormsQuery({
             ...query,
@@ -115,12 +115,12 @@ export class FormsService {
 
         const form = res.elts[0];
 
-        if (query.withMaskCat) {
+        if (query?.withMaskCat) {
             const formMask = await this.getFormCategory(query.withMaskCat, FORM_MASK_ROOT, form.root);
             FormUtils.addLocalForm(form, formMask);
         }
 
-        if (query.withStyleCat) {
+        if (query?.withStyleCat) {
             const formStyle = await this.getFormCategory(query.withStyleCat, FORM_STYLE_ROOT, form.root);
             FormUtils.addLocalForm(form, formStyle);
         }

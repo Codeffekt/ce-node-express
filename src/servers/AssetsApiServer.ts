@@ -34,33 +34,33 @@ export class AssetsApiServer {
                 const storagePath = this.storageService.getStoragePath((<any>req).params.id, req.user.data.diagAccount);
                 (<any>cb)(null, storagePath);
             },
-            filename: (req, file, cb) => {              
+            filename: (req, file, cb) => {
                 const filename = this.storageService.getFilename((<any>req).params.id);
                 (<any>cb)(null, filename);
             }
         });
 
         this.storageHandler = multer({ storage: this.storageEngine }).single("file");
-    }    
+    }
 
     @Get({ path: '/images/:id' })
-    async getImageThumb(req: JwtUserRequest, res: Response, next: NextFunction) {        
-        try {               
+    async getImageThumb(req: JwtUserRequest, res: Response, next: NextFunction) {
+        try {
             const bucketId = req.params.id;
-            const fileDir = `${this.storageService.getStoragePath(bucketId, req.user.data.diagAccount, false)}/`;                           
-            res.contentType("image/jpg");                        
+            const fileDir = `${this.storageService.getStoragePath(bucketId, req.user.data.diagAccount, false)}/`;
+            res.contentType("image/jpg");
             req.url = bucketId; // we force the url replacement because quickthumb parse this property to retrieve the image name
-            if(!existsSync(`${fileDir}/${bucketId}`)) {
+            if (!existsSync(`${fileDir}/${bucketId}`)) {
                 throw new EltNotFoundError(`Image ${req.params.id} not found`, req.params);
             }
-            return quickthumb.static(fileDir)(req, res, next);            
+            return quickthumb.static(fileDir)(req, res, next);
         } catch (err) {
             next(err);
         }
     }
 
     @Post({ path: '/upload/:id' })
-    runMulter(req: JwtUserRequest, res: Response, next: NextFunction) {        
+    runMulter(req: JwtUserRequest, res: Response, next: NextFunction) {
         return this.storageHandler(req, res, next);
     }
 
@@ -89,21 +89,20 @@ export class AssetsApiServer {
     async download(req: JwtUserRequest, res: Response, next: NextFunction) {
         try {
             const asset = await this.assetsService.getAsset(req.params.id);
-            const diagAccount = asset.key ? {...req.user.data.diagAccount, key: asset.key } : req.user.data.diagAccount;
+            const diagAccount = asset.key ? { ...req.user.data.diagAccount, key: asset.key } : req.user.data.diagAccount;
             const resAsset = {
                 ...asset, ...{
                     path: this.storageService.getStoragePath(req.params.id, diagAccount, false),
                     mimetype: req.query.mimetype ? req.query.mimetype : asset.mimetype
                 }
             };
-            readFile(resAsset.path + "/" + resAsset.name, function (err: any, data: any) {
-
+            readFile(resAsset.path + "/" + resAsset.name, function (err: any, data: any) {                
                 if (err) {
                     next(err);
+                } else {
+                    res.contentType(resAsset.mimetype as string);
+                    res.send(data);
                 }
-
-                res.contentType(resAsset.mimetype as string);
-                res.send(data);
             });
         } catch (err) {
             next(err);

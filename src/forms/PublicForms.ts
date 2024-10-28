@@ -15,6 +15,7 @@ import { FormUpdateFacade } from "../forms/FormUpdateFacade";
 import { FormCopyFacade } from "./FormCopyFacade";
 import { FormsRootService } from "../services/FormsRootService";
 import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
+import { FormsQueryArrayFacade } from "./FormsQueryArrayFacade";
 
 @CeApiComponent()
 export class PublicForms {
@@ -111,6 +112,11 @@ export class PublicForms {
   }
 
   @CeApiCall
+  getFormsQueryArray(id: IndexType, field: IndexType, query: FormQuery): Promise<DbArrayRes<FormInstance>> {
+    return FormsQueryArrayFacade.retrieve(id, field, query);
+  }
+
+  @CeApiCall
   getFormQuery(id: IndexType, query: FormQuery) {
     return this.formsService.getFormQuery(id, query);
   }
@@ -126,9 +132,14 @@ export class PublicForms {
   }
 
   @CeApiCall
-  @CeApiAdmin  
-  async formMutation(mutation: FormMutate) {
-    const formMutate = new FormMutateFacade(undefined, mutation);
+  @CeApiRole(
+    ROLE_CREATE)
+  @CeApiBinds
+  async formMutation(@CeApiAccountId id, mutation: FormMutate) {
+    const formMutate = new FormMutateFacade(undefined, {
+      author: id,
+      ...mutation,
+    });
     return formMutate.execute();
   }
 }

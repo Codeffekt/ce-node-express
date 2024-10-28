@@ -17,6 +17,7 @@ export * from './FormBlockBuilder';
 export * from './FormCreateFromRootFacade';
 export * from './FormRootDepsBuilder';
 export * from './FormFactoryCreateFacade';
+export * from './FormsQueryArrayFacade';
 export * from "./PublicForms";
 export * from "./PublicFormsVersion";
 export * from "./PublicFormsRoot";

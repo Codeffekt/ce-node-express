@@ -19,3 +19,4 @@ export * from './account';
 export * from './project';
 export * from './processing';
 export * from './spaces-editor';
+export * from './events';
