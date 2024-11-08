@@ -1,3 +1,5 @@
+## [1.12.2] - Add SSE Events on form update
+
 ## [1.12.1] - Add worker module service
 
 ## [1.12.0] - Add Factory mutation
