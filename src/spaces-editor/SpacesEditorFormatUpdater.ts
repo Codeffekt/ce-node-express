@@ -1,5 +1,5 @@
 import {
-    EltNotFoundError, FormAssoc, FormSpaceEditorFormatWrapper,
+    EltNotFoundError, FormSpaceEditorFormatWrapper,
     FormSpaceEditorLayoutWrapper, FormSpaceEditorNodeLayout,
     FormUtils,
     FormWrapper, IncorrectFormatError, IndexType, SpacesEditorFormat
@@ -80,7 +80,7 @@ export class SpacesEditorFormatUpdater {
             throw new IncorrectFormatError(`Project entry point not found`);
         }
 
-        entryPointBlock.root = this.format.context.entryPoint;
+        entryPointBlock.value = this.format.context.entryPoint;
 
         await this.formsService.updateForm(contextForm, this.author);
     }

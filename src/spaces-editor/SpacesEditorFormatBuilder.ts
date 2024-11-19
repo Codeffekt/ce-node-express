@@ -119,7 +119,7 @@ export class SpacesEditorFormatBuilder {
             author: contextForm.author,
             version: "NA",
             ...contextFormWrapper.props,
-            entryPoint: entryPointBlock.root,
+            entryPoint: entryPointBlock.value,
         };
     }
 
