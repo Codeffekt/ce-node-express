@@ -1,4 +1,5 @@
 import {
+    DbArrayRes,
     EltNotFoundError, FormBlock,
     FormInstance, FormInstanceBase,
     FormUtils,
@@ -33,6 +34,13 @@ export class FormUpgradeFacade {
             formRoot: root.id,
             indices
         });
+
+        await this.upgradeFromForms(root, forms);
+    }
+
+    async upgradeFromForms(root: FormInstanceBase, forms: DbArrayRes<FormInstance>) {
+
+        this.newForms = [];        
 
         if (!forms.elts.length) {
             return;

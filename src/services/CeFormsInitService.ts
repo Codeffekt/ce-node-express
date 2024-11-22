@@ -1,11 +1,11 @@
-import { AccountSettings, FormRoot } from "@codeffekt/ce-core-data";
+import { AccountSettings, FormRoot, IndexType } from "@codeffekt/ce-core-data";
 import { Inject, Service } from "../core/CeService";
 import { AccountsService } from "./AccountsService";
 import { AuthService } from "./AuthService";
 import { ContextService } from "./ContextService";
 import { DbConfigService } from "./DbConfigService";
-import { FormsService } from "./FormsService";
 import { Roots } from "../core/Roots";
+import { FormsRootService } from "./FormsRootService";
 
 export interface InitUserConfig {
     login: string;
@@ -37,10 +37,10 @@ export class CeFormsInitService {
     private readonly dbConfigService: DbConfigService;
 
     @Inject(AccountsService)
-    private readonly accountsService: AccountsService;
+    private readonly accountsService: AccountsService;    
 
-    @Inject(FormsService)
-    private readonly formsService: FormsService;
+    @Inject(FormsRootService)
+    private readonly formsRootService: FormsRootService;
 
     constructor() { }
 
@@ -49,22 +49,23 @@ export class CeFormsInitService {
         if (config.clearTables) {
             await this.dbConfigService.clearTables();
         }
-        await this.insertFormsRoot();
-        await this.insertDefaultAccount(config);
+        const defaultAccount = await this.insertDefaultAccount(config);
+        await this.insertFormsRoot(defaultAccount.id);
+        
     }
 
-    private async insertFormsRoot() {
+    private async insertFormsRoot(author: IndexType) {
         const roots = Roots.forms.map<FormRoot>(root => ({
             ...root,
             ctime: Date.now()
         }));
 
         for (const root of roots) {
-            await this.formsService.upsertFormRoot(root);
+            await this.formsRootService.upsertFormRoot(root, author);
         }
     }
 
-    private async insertDefaultAccount(config: InitConfig) {
+    private async insertDefaultAccount(config: InitConfig): Promise<AccountSettings> {
 
         const defaultAdminConfig = config.defaultAccount;
 
@@ -73,7 +74,7 @@ export class CeFormsInitService {
         console.log(existingAccount);
 
         if(existingAccount) {
-            return;
+            return existingAccount;
         }
 
         const hashPasswd = await AuthService.createHash(defaultAdminConfig.passwd);
@@ -92,7 +93,7 @@ export class CeFormsInitService {
             projects: []
         };
 
-        await this.accountsService.addAccount(defaultAdmin);
+        return this.accountsService.addAccount(defaultAdmin);
     }
 
 }

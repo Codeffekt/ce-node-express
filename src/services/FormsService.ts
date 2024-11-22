@@ -11,7 +11,7 @@ import { filter } from "rxjs/operators";
 import { Inject, Service } from "../core/CeService";
 import { 
     DB_TABLE_ACCOUNTS, DB_TABLE_FORMS, 
-    DB_TABLE_FORMSROOT, DB_TABLE_FORMSROOT_ASSOC, 
+    DB_TABLE_FORMSROOT, 
     DB_TABLE_FORMS_ASSOC, DbTablesOption } from "../core/Db";
 import { FormQueryParser } from "../forms-sql/FormQueryParser";
 import { SqlRenderer } from "../forms-sql/SqlRenderer";
@@ -69,13 +69,7 @@ export class FormsService {
     deleteFormRoot(id: IndexType): Promise<boolean> {
         return this.db.poolProject.query("delete from formsroot where data->>'id'=$1", [id])
             .then((res: any) => res.rowCount > 0);
-    }
-
-    async upsertFormRoot(src: FormRoot): Promise<FormRoot> {
-        await this.db.poolProject.query("insert into formsroot(data) values($1) on conflict((data->>'id')) do update set data=$1",
-            [JSON.stringify(src)])
-        return src;
-    }
+    }    
 
     async updateForm(src: FormInstance, author: IndexType): Promise<FormInstance> {
         await this.db.poolProject.query(`update forms set data=$1 where data->>'id'=$2`,
@@ -93,7 +87,7 @@ export class FormsService {
     }
 
     getFormsQuery(query: FormQuery): Promise<DbArrayRes<FormInstanceExt>> {
-        const queryProcess = new FormsQueryProcess();
+        const queryProcess = new FormsQueryProcess(this.db);
         return queryProcess.execute(query);
     }
 
@@ -298,11 +292,7 @@ export class FormsService {
 
     sanitizeForm(form: FormInstanceExt, author?: IndexType, mtime?: number) {
         return this.context.sanitizeForm(form, author, mtime);
-    }
-
-    sanitizeFormRoot(form: FormRoot, mtime?: number) {
-        return this.context.sanitizeFormRoot(form, mtime) as any;
-    }
+    }    
 
     private async formHaveIndexBlock(formId: IndexType) {
         const form = await this.getForm(formId);

@@ -1,3 +1,7 @@
+## [1.13.0]
+ - Add Messaging system for micro service architecture
+ - Add support with RabbitMq
+
 ## [1.12.3] - Entrypoint context for spaces now contains root type
 
 ## [1.12.2] - Add SSE Events on form update

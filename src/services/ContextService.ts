@@ -35,11 +35,11 @@ export class ContextService {
         } as any;
     }
 
-    sanitizeFormRoot(form: FormRoot, mtime?: number) {
+    sanitizeFormRoot(form: FormRoot, mtime?: number): FormRoot {
         return {
             ...form,
             mtime,
-        } as any;
+        };
     }
 
     copyForm(form: FormInstanceExt, author?: IndexType): FormInstance {

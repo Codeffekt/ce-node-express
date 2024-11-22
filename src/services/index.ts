@@ -2,6 +2,7 @@ export * from './AccountsService';
 export * from './ContextService';
 export * from './ProjectsService';
 export * from './FormsService';
+export * from './FormsRootService';
 export * from './ExpressApplication';
 export * from './AuthService';
 export * from './AssetsService';

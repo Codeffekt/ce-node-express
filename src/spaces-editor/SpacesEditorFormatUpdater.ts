@@ -121,7 +121,7 @@ export class SpacesEditorFormatUpdater {
         await this.formsRootService.deleteFormsAssoc(this.projectForm.getRootsRef());        
 
         for (const root of this.format.forms) {
-            await this.formsService.upsertFormRoot(root);
+            await this.formsRootService.upsertFormRoot(root, this.author);
         }
 
         await this.formsRootService.insertFormsAssoc(

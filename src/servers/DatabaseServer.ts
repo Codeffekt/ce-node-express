@@ -1,8 +1,12 @@
-import { AccountSettings, FormRoot, IndexType, FormInstanceExt } from "@codeffekt/ce-core-data";
+import { AccountSettings, FormRoot, IndexType, FormInstanceExt, FormAssoc, FormQuery, DbArrayRes } from "@codeffekt/ce-core-data";
 import { Client, Pool, PoolConfig } from "pg";
 import { ReplaySubject } from "rxjs";
 import { OldProject } from "../core";
+import { DbTablesOption } from "../core/Db";
 import { Service } from "../core/CeService";
+import { SqlDeleteBuilder } from "../forms-sql/SqlDeleteBuilder";
+import { SqlInsertBuilder } from "../forms-sql/SqlInsertBuilder";
+import { FormsQueryProcess } from "../services/FormsQueryProcess";
 
 
 export function isProjectsUpdate(u: TableUpdateEvent) {
@@ -108,6 +112,58 @@ export class DatabaseServer {
             this.cachedFormsAdmin = await this.query_rows(this.poolProject, "select * from formsadmin");
         }
         return this.cachedFormsAdmin;
+    }    
+
+    async upSertElt<T>(src: T, table: string): Promise<T> {
+        await this.poolProject.query(`insert into ${table}(data) values($1) on conflict((data->>'id')) do update set data=$1`,
+            [JSON.stringify(src)]);
+        return src;
+    }
+
+    async getFormsQuery(query: FormQuery, tables: DbTablesOption): Promise<DbArrayRes<FormRoot>> {
+        const queryProcess = new FormsQueryProcess(this);
+        return queryProcess.execute({ ...query, extMode: false }, tables);
+    }
+    
+    async insertFormAssoc(assoc: FormAssoc, tables: DbTablesOption): Promise<FormAssoc> {
+        await this.poolProject.query(
+            SqlInsertBuilder.fromFormAssoc(assoc, tables)
+        );        
+        return assoc;
+    }
+
+    async insertFormsAssoc(elts: FormAssoc[], tables: DbTablesOption): Promise<boolean> {
+        if(!elts?.length) {
+            return true;
+        }
+        await this.poolProject.query(
+            SqlInsertBuilder.fromFormsAssoc(elts, tables)
+        );        
+        return true;
+    }
+
+    async deleteFormAssoc(assoc: FormAssoc, tables: DbTablesOption): Promise<boolean> {
+        await this.poolProject.query(SqlDeleteBuilder.fromFormAssoc(assoc, tables));
+        return true;
+    }
+
+    async deleteFormsAssoc(ref: IndexType, tables: DbTablesOption): Promise<boolean> {
+        await this.poolProject.query(SqlDeleteBuilder.fromFormAssocRef(ref, tables));
+        return true;
+    }
+
+    async deleteFormsAssocs(assocs: FormAssoc[], tables: DbTablesOption) {
+        if (!assocs?.length) {
+            return false;
+        }        
+        await this.poolProject.query(SqlDeleteBuilder.fromFormsAssoc(assocs, tables));
+    }
+
+    async deleteFormsAssocIndices(ref: IndexType, indices: IndexType[], tables: DbTablesOption): Promise<boolean> {        
+        await this.poolProject.query(
+            SqlDeleteBuilder.fromFormAssocIndices(ref, indices, tables)
+        );
+        return true;
     }
 
     private async listenTableUpdate(configProject: any) {

@@ -1,6 +1,5 @@
 import { DbArrayRes, FormAggField, FormInstance, FormInstanceExt, FormQuery, IndexType } from "@codeffekt/ce-core-data";
 import { QueryResult } from "pg";
-import { Inject } from "../core/CeService";
 import { FormQueryParser, FormQueryParserOptions } from "../forms-sql/FormQueryParser";
 import { SqlRenderer } from "../forms-sql/SqlRenderer";
 import { DatabaseServer } from "../servers/DatabaseServer";
@@ -23,32 +22,34 @@ interface ResFormRow {
     f_name: string;
 }
 
-export class FormsQueryProcess {
+export class FormsQueryProcess {    
 
-    @Inject(DatabaseServer)
-    private readonly db: DatabaseServer;
-
-    constructor() {
+    constructor(private db: DatabaseServer) {
     }
 
     async execute(query: FormQuery, options?: FormQueryParserOptions): Promise<DbArrayRes<FormInstanceExt>> {
         const formParser = new FormQueryParser(query, options);
         const queryDB = SqlRenderer.renderSQLFromSqlAST(formParser.toAST());
 
+        console.log("[FormsQueryProcess] == query begin");
         console.log(queryDB);
+        console.log("[FormsQueryProcess] == query end");        
+
+        
 
         const client = await this.db.poolProject.connect();        
 
-        try {
+        try {            
             await client.query('BEGIN');
-            //await client.query('SET join_collapse_limit = 1);
+            // await client.query('SET join_collapse_limit = 1);
             await client.query("CREATE TEMP sequence if not exists temp_seq");
             await client.query("SELECT setval('temp_seq', 1)");
-            const dbRes = await client.query<ResFormRow>(queryDB);
-            await client.query('COMMIT');
-            return this.processRes(query, dbRes);            
+            const dbRes = await client.query<ResFormRow>(queryDB);            
+            await client.query('COMMIT');            
+            return this.processRes(query, dbRes);                        
         } catch (e) {
-            await client.query('ROLLBACK')
+            await client.query('ROLLBACK');
+            console.error(e);
             throw e;
         } finally {
             client.release();

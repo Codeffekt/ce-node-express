@@ -1,0 +1,15 @@
+version: "2.2"
+services:
+  rabbitmq:
+    image: rabbitmq:4.0.3-management-alpine
+    container_name: 'ce_rabbitmq'
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:5672:5672
+        - 127.0.0.1:15672:15672    
+    networks:
+        - diag_network
+networks:
+  diag_network:
+    external: true
+  

@@ -17,11 +17,13 @@ import { SimpleDBApp } from "../app/SimpleDBApp";
 import { DbConfigService } from "./DbConfigService";
 import { CeFormsInitService } from "./CeFormsInitService";
 import { SimpleAdminDBApp } from "../app/SimpleAdminDBApp";
+import { MessagesServer, MessagesServerConfig } from "../servers/MessagesServer";
 
 export interface ExpressApplicationConfig {
     contextRoot: string;
     authConfig: AuthServiceConfig;
     pgConfig: PoolConfig;
+    msgConfig: MessagesServerConfig;
     corsConfig?: any;
     routers: any[];
     jsonConfig?: { limit: string | number };
@@ -48,6 +50,9 @@ export class ExpressApplication {
                 password: process.env.PGPASSWD,
                 database: process.env.PGDB,
                 port: parseInt(process.env.PGPORT!)
+            },
+            msgConfig: {
+                url: process.env.MSG_URL || "amqp://guest:guest@127.0.0.1:5672",                
             },
             authConfig: {
                 env: process.env,
@@ -99,6 +104,8 @@ export class ExpressApplication {
 
         await CeService.get(DatabaseServer).setConfig(config.pgConfig);
         CeService.get(AuthService).setConfig(config.authConfig);
+
+        await CeService.get(MessagesServer).setConfig(config.msgConfig);
 
         this.app = express();
         this.app.use(cors(this.config.corsConfig));

@@ -6,15 +6,20 @@ import {
     DbTablesOption
 } from "../core/Db";
 import { DatabaseServer } from "../servers/DatabaseServer";
-import { SqlInsertBuilder } from "../forms-sql/SqlInsertBuilder";
-import { SqlDeleteBuilder } from "../forms-sql/SqlDeleteBuilder";
-import { FormsQueryProcess } from "./FormsQueryProcess";
+import { MessagesServer } from "../servers/MessagesServer";
+import { ContextService } from "./ContextService";
 
 @Service()
 export class FormsRootService {
 
     @Inject(DatabaseServer)
     private readonly db: DatabaseServer;    
+
+    @Inject(ContextService)
+    private readonly context: ContextService;
+
+    @Inject(MessagesServer)
+    private readonly ms: MessagesServer;
 
     private dbTables: DbTablesOption = {
         formsTableName: DB_TABLE_FORMS,
@@ -32,49 +37,42 @@ export class FormsRootService {
             .then(root => root.find(elt => elt.id === id));
     }
 
+    async upsertFormRoot(src: FormRoot, author: IndexType): Promise<FormRoot> {
+        const root = this.sanitizeForm(src, Date.now());        
+        const res = await this.db.upSertElt(root, this.dbTables.formsRootTableName);
+        this.ms.sendFormsRootUpsert(root, author);
+        return res;
+    }
+
+    sanitizeForm(form: FormRoot, mtime?: number) {
+        return this.context.sanitizeFormRoot(form, mtime);
+    }
+
     getFormsQuery(query: FormQuery): Promise<DbArrayRes<FormRoot>> {
-        const queryProcess = new FormsQueryProcess();
-        return queryProcess.execute({ ...query, extMode: false }, this.dbTables);
+        return this.db.getFormsQuery(query, this.dbTables);
     }
 
     async insertFormAssoc(assoc: FormAssoc): Promise<FormAssoc> {
-        await this.db.poolProject.query(
-            SqlInsertBuilder.fromFormAssoc(assoc, this.dbTables)
-        );        
-        return assoc;
+        return this.db.insertFormAssoc(assoc, this.dbTables);        
     }
 
     async insertFormsAssoc(elts: FormAssoc[]): Promise<boolean> {
-        if(!elts?.length) {
-            return true;
-        }
-        await this.db.poolProject.query(
-            SqlInsertBuilder.fromFormsAssoc(elts, this.dbTables)
-        );        
-        return true;
+        return this.db.insertFormsAssoc(elts, this.dbTables);
     }
 
     async deleteFormAssoc(assoc: FormAssoc): Promise<boolean> {
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssoc(assoc, this.dbTables));
-        return true;
+        return this.db.deleteFormAssoc(assoc, this.dbTables);
     }
 
     async deleteFormsAssoc(ref: IndexType): Promise<boolean> {
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssocRef(ref, this.dbTables));
-        return true;
+        return this.db.deleteFormsAssoc(ref, this.dbTables);
     }
 
     async deleteFormsAssocs(assocs: FormAssoc[]) {
-        if (!assocs?.length) {
-            return false;
-        }        
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormsAssoc(assocs, this.dbTables));
+        return this.db.deleteFormsAssocs(assocs, this.dbTables);
     }
 
     async deleteFormsAssocIndices(ref: IndexType, indices: IndexType[]): Promise<boolean> {        
-        await this.db.poolProject.query(
-            SqlDeleteBuilder.fromFormAssocIndices(ref, indices, this.dbTables)
-        );
-        return true;
+        return this.db.deleteFormsAssocIndices(ref, indices, this.dbTables);
     }
 }

@@ -368,14 +368,8 @@ export class Roots {
               },
               "entryPoint": {
                 "field": "entryPoint",
-                "type": "formArray",
-                "label": "entryPoint",
-                "params": {
-                  "fields": [
-                    "$id",
-                    "$ctime",
-                  ]
-                }                
+                "type": "root",
+                "label": "entryPoint"                       
               }
             }
           },

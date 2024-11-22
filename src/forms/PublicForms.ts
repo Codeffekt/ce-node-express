@@ -1,7 +1,8 @@
 import {
   IndexType, FormRoot, ROLE_CREATE,
   FormInstanceExt, FormInstance,
-  DbArrayRes, FormQuery, FormMutate
+  DbArrayRes, FormQuery, FormMutate,
+  EltNotFoundError
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { 
@@ -29,8 +30,12 @@ export class PublicForms {
   constructor() { }
 
   @CeApiCall
-  getRoot(id: IndexType): Promise<FormRoot> {
-    return this.formsService.getFormRoot(id);
+  async getRoot(id: IndexType): Promise<FormRoot> {
+    const root = await this.formsService.getFormRoot(id);
+    if(root === undefined) {
+      throw new EltNotFoundError(`Root ${id} not found`, { root: id });
+    }
+    return root;
   }
 
   @CeApiCall
@@ -84,8 +89,9 @@ export class PublicForms {
 
   @CeApiCall
   @CeApiAdmin
-  updateRoot(elt: FormRoot): Promise<FormRoot> {
-    return this.formsService.upsertFormRoot(this.formsService.sanitizeFormRoot(elt, Date.now()));
+  @CeApiBinds
+  updateRoot(@CeApiAccountId id: IndexType, elt: FormRoot): Promise<FormRoot> {
+    return this.formsRootService.upsertFormRoot(elt, id);
   }
 
   @CeApiCall
@@ -107,7 +113,7 @@ export class PublicForms {
   }
 
   @CeApiCall
-  getFormsQuery(query: FormQuery) {
+  getFormsQuery(query: FormQuery) {    
     return this.formsService.getFormsQuery({ limit: 0, offset: 0, ...query });
   }
 

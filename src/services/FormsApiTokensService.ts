@@ -62,7 +62,7 @@ export class FormsApiTokensService {
     }
 
     async getFormsQuery(query: FormQuery): Promise<DbArrayRes<FormInstance | FormInstanceExt>> {
-        const queryProcess = new FormsQueryProcess();
+        const queryProcess = new FormsQueryProcess(this.db);
         return queryProcess.execute(query, { 
             formsTableName: DB_TABLE_FORMS,
             formsRootTableName: DB_TABLE_FORMSROOT,

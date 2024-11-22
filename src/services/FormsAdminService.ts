@@ -37,7 +37,7 @@ export class FormsAdminService {
     }
 
     getFormsAdminQuery(query: FormQuery): Promise<DbArrayRes<FormInstanceExt>> {
-        const queryProcess = new FormsQueryProcess();
+        const queryProcess = new FormsQueryProcess(this.db);
         return queryProcess.execute({ ...query, extMode: false }, 
             { 
                 formsTableName: DB_TABLE_FORMS,

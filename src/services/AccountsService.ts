@@ -36,7 +36,7 @@ export class AccountsService {
 
     async getAccountsFormQuery(query: FormQuery): Promise<DbArrayRes<AccountSettings>> {
 
-        const queryProcess = new FormsQueryProcess();
+        const queryProcess = new FormsQueryProcess(this.db);
         const res = queryProcess.execute({ ...query, extMode: false }, 
                 { 
                     formsTableName: DB_TABLE_FORMS, 
