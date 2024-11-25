@@ -1,3 +1,6 @@
+## [1.13.1]
+ - Fix: check undefined message client
+
 ## [1.13.0]
  - Add Messaging system for micro service architecture
  - Add support with RabbitMq

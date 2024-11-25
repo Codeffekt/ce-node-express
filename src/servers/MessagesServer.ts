@@ -10,7 +10,7 @@ export interface MessagesServerConfig {
 @Service()
 export class MessagesServer {
 
-    private messageClient: RabbitMqClient;
+    private messageClient?: RabbitMqClient;
     private config: MessagesServerConfig;
     private formsRootQueueId = "formsroot";
     private formsQueueId = "forms";
@@ -37,7 +37,7 @@ export class MessagesServer {
     }
 
     sendFormsRootUpsert(root: FormRoot, author: IndexType) {
-        this.messageClient.sendToQueue<FormEvent>(this.formsRootQueueId, {
+        this.messageClient?.sendToQueue<FormEvent>(this.formsRootQueueId, {
             type: 'update',
             elts: [root.id],
             author,
@@ -46,6 +46,6 @@ export class MessagesServer {
     }
 
     setFormsRootEventListener(listener: EventListener) {
-        this.messageClient.setConsumeListener(this.formsRootQueueId, listener);
+        this.messageClient?.setConsumeListener(this.formsRootQueueId, listener);
     }
 }

@@ -52,7 +52,7 @@ export class DatabaseServer {
     constructor() {
     }
 
-    async setConfig(configProject: PoolConfig) {
+    async setConfig(configProject: PoolConfig) {        
         await this.close();
         this.poolProject = new Pool(configProject);        
         await this.listenTableUpdate(configProject);        

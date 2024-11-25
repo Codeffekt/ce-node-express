@@ -153,11 +153,11 @@ export class ExpressApplication {
 
         try {
 
-            await SimpleDBApp.init();   
+            await SimpleDBApp.init();               
             await SimpleDBApp.close();    
     
-        } catch(err) {
-    
+        } catch(err) {            
+
             if(err.errno === ECONNREFUSED) {
                 console.error("Database network access refused");
                 process.exit(-1);
