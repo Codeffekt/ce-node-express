@@ -24,6 +24,7 @@ First you need to create an environnement file
     CE_FORMS_LOGIN=<default login>
     CE_FORMS_ACCOUNT=<default account>
     CE_FORMS_PASSWD=<default password>
+    MSG_URL=<rabbitmq url>
 
 Then you give the file path from the command line using the ENV_SCRIPT variable
 

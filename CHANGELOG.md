@@ -1,3 +1,7 @@
+## [1.13.2]
+ - Fix: set processing form status to error when api call fail
+ - Remove @codeffek/ce-events-data and sockets deps
+
 ## [1.13.1]
  - Fix: check undefined message client
 

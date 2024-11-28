@@ -8,7 +8,6 @@ export * from './AuthService';
 export * from './AssetsService';
 export * from './StoragePathService';
 export * from './FormsVersionService';
-export * from './FormsEventsService';
 export * from './DbConfigService';
 export * from './RemoteApiService';
 export * from './FormsApiTokensService';

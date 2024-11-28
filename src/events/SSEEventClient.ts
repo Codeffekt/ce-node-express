@@ -2,15 +2,11 @@ import { Subscription } from "rxjs";
 import { JwtUserRequest } from "../core/Auth";
 import { Response } from "express";
 import { NextFunction } from "express";
-import { CeEventClient } from "../servers/CeEventClient";
 import { Inject } from "../core/CeService";
 import { FormsService, FormsUpdateEvent } from "../services/FormsService";
 import { FormEvent } from "@codeffekt/ce-core-data";
 
-export class SSEEventClient {
-
-    @Inject(CeEventClient)
-    private eventClient: CeEventClient;
+export class SSEEventClient {    
 
     @Inject(FormsService)
     private formsService: FormsService;

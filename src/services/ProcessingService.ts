@@ -13,8 +13,13 @@ export class ProcessingService {
         const processing = await ProcessingOperator.fromProcessingId(
             processingId, account);
         if (!processing.isStarted()) {
+            try {
             await processing.setPendingStatus();
             await this.callApi(processing, () => processing.getApiStart());
+            } catch(err) {
+                await processing.setErrorStatus();
+                throw err;
+            }
         }
         return processing.getSanitizedForm();
     }

@@ -48,13 +48,21 @@ export class ProcessingOperator {
     }
 
     async setPendingStatus() {
-        FormWrapper.setFormValue("status", "PENDING", this.form);
-        await this.formsService.updateForm(this.getSanitizedForm(), this.account.id);
+        return this.updateStatus("PENDING");
+    }
+
+    async setErrorStatus() {
+        return this.updateStatus("ERROR");
     }
 
     private getApiEndpoint(endpoint: string) {
         const server = FormWrapper.getFormValue("server", this.endpoint);
         return `${server}/${endpoint}`;
+    }
+
+    private async updateStatus(status: string) {
+        FormWrapper.setFormValue("status", status, this.form);
+        await this.formsService.updateForm(this.getSanitizedForm(), this.account.id);
     }
 
     private async retrieveProcessingData() {
