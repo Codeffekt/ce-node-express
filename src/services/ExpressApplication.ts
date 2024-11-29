@@ -154,7 +154,11 @@ export class ExpressApplication {
         try {
 
             await SimpleDBApp.init();               
-            await SimpleDBApp.close();    
+            await SimpleDBApp.close();   
+            
+            if(process.env.CE_FORCE_START_APP === "true") {
+                await this.startAppInstallation();
+            }
     
         } catch(err) {            
 
@@ -194,7 +198,7 @@ export class ExpressApplication {
                     account: process.env.CE_FORMS_ACCOUNT,
                     passwd: process.env.CE_FORMS_PASSWD,
                 },
-                clearTables: true
+                clearTables: process.env.CE_START_APP_CLEAR_TABLE === "true"
             });
             await SimpleDBApp.close();
         } catch(err) {

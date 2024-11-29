@@ -1,3 +1,7 @@
+## [1.13.3]
+ - Merge forms params
+ - add CE_START_APP_CLEAR_TABLE=<true or false> CE_FORCE_START_APP=<true or false>
+
 ## [1.13.2]
  - Fix: set processing form status to error when api call fail
  - Remove @codeffek/ce-events-data and sockets deps

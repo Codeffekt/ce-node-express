@@ -25,6 +25,8 @@ First you need to create an environnement file
     CE_FORMS_ACCOUNT=<default account>
     CE_FORMS_PASSWD=<default password>
     MSG_URL=<rabbitmq url>
+    CE_START_APP_CLEAR_TABLE=<true or false>
+    CE_FORCE_START_APP=<true or false>
 
 Then you give the file path from the command line using the ENV_SCRIPT variable
 

@@ -83,6 +83,7 @@ export class FormUpgradeFacade {
 
         form.title = root.title;
         if (rootCopy.table) form.table = rootCopy.table;
+        if (rootCopy.params) form.params = rootCopy.params;
         form.content = {
             ...rootCopy.content,
             ...
