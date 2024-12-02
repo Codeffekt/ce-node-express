@@ -3,24 +3,17 @@ import {
     EltNotFoundError, FormBlock,
     FormInstance, FormInstanceBase,
     FormUtils,
-    FormWrapper, 
+    FormWrapper,
     IndexType, Utils
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
-
-function updateBlock(oldBlock: FormBlock, newBlock: FormBlock) {
-    return {
-        ...newBlock,
-        // do not update the block value if already there    
-        value: oldBlock.value === undefined ? newBlock.value : oldBlock.value
-    };
-}
+import { FormBlockMergeOperator } from "./blocks";
 
 export class FormUpgradeFacade {
 
     @Inject(FormsService)
-    private readonly formsService: FormsService;    
+    private readonly formsService: FormsService;
 
     private newForms: FormInstance[] = [];
 
@@ -40,7 +33,7 @@ export class FormUpgradeFacade {
 
     async upgradeFromForms(root: FormInstanceBase, forms: DbArrayRes<FormInstance>) {
 
-        this.newForms = [];        
+        this.newForms = [];
 
         if (!forms.elts.length) {
             return;
@@ -72,7 +65,7 @@ export class FormUpgradeFacade {
     }
 
     private async insertForms() {
-        if (this.newForms && this.newForms.length) {            
+        if (this.newForms && this.newForms.length) {
             await this.formsService.insertForms(this.newForms, this.authorId);
         }
     }
@@ -90,7 +83,13 @@ export class FormUpgradeFacade {
             // updated blocks
             Object.keys(rootCopy.content)
                 .filter(field => form.content[field] !== undefined)
-                .reduce((prev, cur) => ({ ...prev, [cur]: updateBlock(form.content[cur], rootCopy.content[cur]) }), {})
+                .reduce((prev, cur) => ({
+                    ...prev,
+                    [cur]: FormBlockMergeOperator.mergeBlocks(
+                        form.content[cur],
+                        rootCopy.content[cur])
+                }),
+                    {})
         };
     }
 

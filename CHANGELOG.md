@@ -1,3 +1,6 @@
+## [1.13.4]
+ - Add specific merge block operations on index type
+
 ## [1.13.3]
  - Merge forms params
  - add CE_START_APP_CLEAR_TABLE=<true or false> CE_FORCE_START_APP=<true or false>
