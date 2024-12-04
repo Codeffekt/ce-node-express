@@ -2,7 +2,7 @@ import { AccountSettings, FormQuery, UnauthorizedError, IndexType } from "@codef
 import { Inject } from "../core/CeService";
 import { AssetsService } from "../services/AssetsService";
 import { AuthService } from "../services/AuthService";
-import { ProjectsService } from "../services/ProjectsService";
+import { AssetsArrayRef } from "./AssetsArrayRef";
 
 const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 10;
@@ -12,24 +12,43 @@ export class AssetsQueryFacade {
     @Inject(AssetsService)
     private readonly assetsService: AssetsService;
 
-    @Inject(ProjectsService)
-    private readonly projectsService: ProjectsService;
-
     @Inject(AuthService)
     private readonly authService: AuthService;
 
     ref: IndexType;
 
-    constructor(private account: AccountSettings) {
+    private constructor(private account: AccountSettings, private query: FormQuery) {
     }
 
-    async execute(query: FormQuery) {
+    static fromQuery(account: AccountSettings, query: FormQuery) {
+        const builder = new AssetsQueryFacade(account, query);
+        return builder.execute();
+    }
 
-        await this.createRef(query);       
+    static async fromAssetsArray(
+        account: AccountSettings,
+        formId: IndexType,
+        field: IndexType,
+        query: FormQuery
+    ) {        
 
-        const limit = !query.limit ? DEFAULT_LIMIT : Math.min(query.limit, MAX_LIMIT);
+        const ref = await AssetsArrayRef.fromAssetsArray(formId, field);
 
-        return this.assetsService.getFormsQuery({ offset: 0, ...query, limit, ref: this.ref });
+        const builder = new AssetsQueryFacade(account,
+            {
+                ...query,
+                ref: ref.ref,
+            });
+        return builder.execute();
+    }
+
+    private async execute() {
+
+        await this.createRef(this.query);
+
+        const limit = !this.query.limit ? DEFAULT_LIMIT : Math.min(this.query.limit, MAX_LIMIT);
+
+        return this.assetsService.getFormsQuery({ offset: 0, ...this.query, limit, ref: this.ref });
     }
 
     private async createRef(query: FormQuery) {

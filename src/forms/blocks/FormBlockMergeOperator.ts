@@ -14,7 +14,7 @@ export class FormBlockMergeOperator {
     }
 
     private static mergeIndexBlocks(curBlock: FormBlock, newBlock: FormBlock): FormBlock {
-        return newBlock.value === undefined && curBlock.value !== undefined ? {
+        return !newBlock.value && curBlock.value ? {
             // the current block has a subform attached to it, so we keep
             // its reference and its model type
             ...newBlock,
@@ -29,7 +29,7 @@ export class FormBlockMergeOperator {
         return {
             ...newBlock,
             // do not update the block value if already there    
-            value: curBlock.value === undefined ? newBlock.value : curBlock.value
+            value: (curBlock.value === undefined || curBlock.value == null) ? newBlock.value : curBlock.value
         };
     }
 

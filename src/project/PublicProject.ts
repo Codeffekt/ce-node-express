@@ -122,13 +122,7 @@ export class PublicProject {
     @CeApiAdmin
     @CeApiBinds
     async deleteAssets(@CeApiAccountId id: IndexType, pid: IndexType, assets: IndexType[], deleteFile = true) {
-        const account = await this.accountsService.getAccountFromId(id);
-        const project = await this.projectsService.getProject(pid);
-        const deleteAction = new AssetsDeleteFacade(
-            account,
-            FormProjectWrapper.getAssetsRef(project)
-        );
-        return deleteAction.execute(assets, deleteFile);
+        throw new Error("Deprecated");
     }
 
     @CeApiCall

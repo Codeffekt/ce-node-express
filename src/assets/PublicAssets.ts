@@ -11,6 +11,7 @@ import { ContextService } from "../services/ContextService";
 import { AssetsService } from "../services/AssetsService";
 import { AssetsDeleteFacade } from "./AssetsDeleteFacade";
 import { AssetsQueryFacade } from "./AssetsQueryFacade";
+import { BucketCreator } from "./BucketCreator";
 @CeApiComponent()
 export class PublicAssets {
 
@@ -54,11 +55,23 @@ export class PublicAssets {
     }
 
     @CeApiCall
+    @CeApiRole(ROLE_CREATE)
+    async createBucketAssetsArray(formId: IndexType, field: IndexType, elt: AssetElt) {
+        return BucketCreator.fromAssetsArray(formId, field, elt);
+    }
+
+    @CeApiCall
     @CeApiBinds
     async getFormsQuery(@CeApiAccountId id: IndexType, query: FormQuery): Promise<DbArrayRes<FormInstance>> {
-        const account = await this.accountsService.getAccountFromId(id);
-        const queryFacade = new AssetsQueryFacade(account);
-        return queryFacade.execute(query);
+        const account = await this.accountsService.getAccountFromId(id);        
+        return AssetsQueryFacade.fromQuery(account, query);
+    }
+
+    @CeApiCall
+    @CeApiBinds
+    async getAssetsArrayQuery(@CeApiAccountId id: IndexType, formId: IndexType, field: IndexType, query: FormQuery): Promise<DbArrayRes<FormInstance>> {
+        const account = await this.accountsService.getAccountFromId(id);        
+        return AssetsQueryFacade.fromAssetsArray(account, formId, field, query);
     }
 
     @CeApiCall
@@ -66,8 +79,14 @@ export class PublicAssets {
     @CeApiBinds
     async deleteAssets(@CeApiAccountId id: IndexType, pid: IndexType, assets: IndexType[], deleteFile = true) {
         const account = await this.accountsService.getAccountFromId(id);
-        const deleteAction = new AssetsDeleteFacade(account, pid);
-        return deleteAction.execute(assets, deleteFile);
+        return AssetsDeleteFacade.fromRef(account, assets, pid, deleteFile);        
+    }
+
+    @CeApiCall
+    @CeApiBinds
+    async deleteAssetsArray(@CeApiAccountId id: IndexType, formId: IndexType, field: IndexType, assets: IndexType[], deleteFile = true) {
+        const account = await this.accountsService.getAccountFromId(id);
+        return AssetsDeleteFacade.fromAssetsArray(account, assets, formId, field, deleteFile);        
     }
 }
 

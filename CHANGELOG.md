@@ -1,3 +1,7 @@
+## [1.13.5]
+ - FIX: compute assets array ref from string interpolation
+ - FIX: merge block on index type
+
 ## [1.13.4]
  - Add specific merge block operations on index type
 
