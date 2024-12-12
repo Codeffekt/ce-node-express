@@ -61,6 +61,7 @@ export class FormFactoryCreateFacade {
         const newForm = await creator.createFromRoot(this.factoryBlock.value, author);
         this.targetBlock.root = newForm.root;
         this.targetBlock.value = newForm.id;
+        this.srcForm.mtime = Date.now();
         return this.formsService.updateForm(this.srcForm, author);
     }
 }

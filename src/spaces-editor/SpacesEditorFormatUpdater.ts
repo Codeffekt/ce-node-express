@@ -81,6 +81,7 @@ export class SpacesEditorFormatUpdater {
         }
 
         entryPointBlock.value = this.format.context.entryPoint;
+        contextForm.mtime = Date.now();
 
         await this.formsService.updateForm(contextForm, this.author);
     }

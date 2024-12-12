@@ -1,3 +1,6 @@
+## [1.13.8]
+ - FIX: missing updates form mtime
+
 ## [1.13.7]
  - FIX: get error message on processing start
  - FIX: update forms mtime on processing updates
