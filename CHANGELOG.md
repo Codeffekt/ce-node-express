@@ -1,3 +1,6 @@
+## [1.13.10]
+ - Add keep alive sse events
+
 ## [1.13.9]
  - Add init message and disable accel buffering for sse events
 
