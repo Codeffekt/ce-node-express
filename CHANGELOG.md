@@ -1,3 +1,6 @@
+## [1.13.9]
+ - Add init message and disable accel buffering for sse events
+
 ## [1.13.8]
  - FIX: missing updates form mtime
 

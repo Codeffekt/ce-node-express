@@ -19,16 +19,20 @@ export class SSEEventClient {
         private next: NextFunction) {
             this.writeInitialHeader();
             this.handleClose();
+            this.sendInitialWelcomeData();
             this.listenToEvents();
     }
 
-    private writeInitialHeader() {
-        this.res.setHeader('Content-Type', 'text/event-stream');
-        this.res.setHeader('Cache-Control', 'no-cache');
-        // do no apply compression middleware
-        // see https://expressjs.com/en/resources/middleware/compression.html
-        this.res.setHeader('Cache-Control', 'no-transform'); 
-        this.res.setHeader('Connection', 'keep-alive');
+    private writeInitialHeader() {                
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            // do no apply compression middleware
+            // see https://expressjs.com/en/resources/middleware/compression.html   
+            'Cache-Control': 'no-cache, no-transform',                     
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
+        };
+        this.res.writeHead(200, headers);
     }
 
     private handleClose() {
@@ -36,6 +40,12 @@ export class SSEEventClient {
             console.log("SSEEVENTCLIENT CLOSE");
             this.subscription.unsubscribe();
         });
+    }
+
+    private sendInitialWelcomeData() {
+        const data = 'data: Hello World!\n\n';
+        this.res.write(`event: init\n`);
+        this.res.write(data);
     }
 
     private listenToEvents() {
