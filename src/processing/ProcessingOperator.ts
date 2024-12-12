@@ -20,7 +20,7 @@ export class ProcessingOperator {
     }
 
     getSanitizedForm() {
-        return this.formsService.sanitizeForm(this.form);
+        return this.formsService.sanitizeForm(this.form, this.account.id, Date.now());
     }
 
     getApiStart(): string {
@@ -49,6 +49,11 @@ export class ProcessingOperator {
 
     async setPendingStatus() {
         return this.updateStatus("PENDING");
+    }
+
+    async setError(msg: string) {
+        FormWrapper.setFormValue("message", msg, this.form);
+        this.setErrorStatus();
     }
 
     async setErrorStatus() {

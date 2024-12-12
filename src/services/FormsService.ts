@@ -3,7 +3,8 @@ import {
     DbArrayRes, EltNotFoundError,
     FormAssoc, FormBlock, FormInstance,
     FormInstanceExt, FormQuery,
-    FormRoot, FormUtils, FORM_MASK_ROOT, FORM_STYLE_ROOT, IFormRootEntity, IndexType, Utils
+    FormRoot, FormUtils, FORM_MASK_ROOT, FORM_STYLE_ROOT, IFormRootEntity, IndexType, Utils,
+    FormBlockType
 } from "@codeffekt/ce-core-data";
 import * as format from "pg-format";
 import { ReplaySubject } from "rxjs";
@@ -20,6 +21,7 @@ import { ContextService } from "./ContextService";
 import { FormsQueryProcess } from "./FormsQueryProcess";
 import { SqlInsertBuilder } from "../forms-sql/SqlInsertBuilder";
 import { SqlDeleteBuilder } from "../forms-sql/SqlDeleteBuilder";
+import { SqlUpdate } from "../forms-sql/SqlUpdate";
 
 const QUERY_FORMS_ASSOC = `select (select count(*) from forms, forms_assoc where ref=$1 and data->>'id'=form) as total, 
 data from forms, forms_assoc where ref=$1 and data->>'id'=form`;
@@ -76,6 +78,13 @@ export class FormsService {
             [JSON.stringify(src), src.id]);
         this.formUpdate$.next({ elts: [src], author });
         return src;
+    }
+
+    async clearBlocksValue(type: FormBlockType, values: IndexType[]): Promise<boolean> {                
+        const queryDB = SqlUpdate.clearFromBlock(type, values);
+        console.log("[clearBlocksValue]", queryDB);
+        await this.db.poolProject.query(queryDB);        
+        return true;
     }
 
     async getForm(id: IndexType): Promise<FormInstance> {

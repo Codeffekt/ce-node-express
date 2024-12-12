@@ -5,6 +5,7 @@ import { AssetsService } from "../services/AssetsService";
 import { Inject } from "../core/CeService";
 import { AuthService } from "../services/AuthService";
 import { AssetsArrayRef } from "./AssetsArrayRef";
+import { FormsService } from "../services/FormsService";
 
 const MAX_DELETE_SIZE = 50;
 
@@ -18,6 +19,9 @@ export class AssetsDeleteFacade {
 
     @Inject(AuthService)
     private readonly authService: AuthService;
+
+    @Inject(FormsService)
+    private readonly formsService: FormsService;
 
     private constructor(
         private account: AccountSettings,
@@ -39,6 +43,8 @@ export class AssetsDeleteFacade {
         if (this.deleteFiles) {
             this.executeDeleteFiles();
         }
+
+        await this.formsService.clearBlocksValue("asset", this.ids);
 
         return true;
     }

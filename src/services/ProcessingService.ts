@@ -17,8 +17,7 @@ export class ProcessingService {
             await processing.setPendingStatus();
             await this.callApi(processing, () => processing.getApiStart());
             } catch(err) {
-                await processing.setErrorStatus();
-                throw err;
+                await processing.setError(err.message ?? "Unknown error call");                
             }
         }
         return processing.getSanitizedForm();

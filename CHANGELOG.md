@@ -1,3 +1,10 @@
+## [1.13.7]
+ - FIX: get error message on processing start
+ - FIX: update forms mtime on processing updates
+
+## [1.13.6]
+ - FIX: delete assets now clear all the pointed forms blocks
+
 ## [1.13.5]
  - FIX: compute assets array ref from string interpolation
  - FIX: merge block on index type
