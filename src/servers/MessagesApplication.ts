@@ -4,6 +4,7 @@ import { CeService, Service } from "../core/CeService";
 import { MessagesServer, MessagesServerConfig } from "./MessagesServer";
 import { ContextService } from "../services/ContextService";
 import { DatabaseServer } from "./DatabaseServer";
+import { FormsMessagesQueues } from "../forms";
 
 export interface MessagesApplicationConfig {
     contextRoot: string;
@@ -32,7 +33,8 @@ export class MessagesApplication {
                 port: parseInt(process.env.PGPORT!)
             },
             msgConfig: {
-                url: process.env.MSG_URL || "amqp://guest:guest@127.0.0.1:5672",                
+                url: process.env.MSG_URL || "amqp://guest:guest@127.0.0.1:5672",
+                queues: process.env.MSG_QUEUES ? process.env.MSG_QUEUES.split(",") : FormsMessagesQueues.QUEUES,
             },
         })        
     }

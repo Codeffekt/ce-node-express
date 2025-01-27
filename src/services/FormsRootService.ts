@@ -8,6 +8,7 @@ import {
 import { DatabaseServer } from "../servers/DatabaseServer";
 import { MessagesServer } from "../servers/MessagesServer";
 import { ContextService } from "./ContextService";
+import { FormMessageBuilder, FormsMessagesQueues } from "../forms";
 
 @Service()
 export class FormsRootService {
@@ -40,7 +41,7 @@ export class FormsRootService {
     async upsertFormRoot(src: FormRoot, author: IndexType): Promise<FormRoot> {
         const root = this.sanitizeForm(src, Date.now());        
         const res = await this.db.upSertElt(root, this.dbTables.formsRootTableName);
-        this.ms.sendFormsRootUpsert(root, author);
+        this.ms.sendMessage(FormsMessagesQueues.FORMS_ROOT, FormMessageBuilder.forRootUpsert(root, author));
         return res;
     }
 

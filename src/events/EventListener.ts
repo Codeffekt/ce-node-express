@@ -1,7 +1,6 @@
-import { FormEvent } from "@codeffekt/ce-core-data";
 
-export interface EventListener {
+export interface EventListener<T> {
 
-    onMessage(event: FormEvent);    
+    onMessage(event: T);    
 
 }

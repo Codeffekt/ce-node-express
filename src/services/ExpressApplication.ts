@@ -18,6 +18,7 @@ import { DbConfigService } from "./DbConfigService";
 import { CeFormsInitService } from "./CeFormsInitService";
 import { SimpleAdminDBApp } from "../app/SimpleAdminDBApp";
 import { MessagesServer, MessagesServerConfig } from "../servers/MessagesServer";
+import { FormsMessagesQueues } from "../forms";
 
 export interface ExpressApplicationConfig {
     contextRoot: string;
@@ -52,7 +53,8 @@ export class ExpressApplication {
                 port: parseInt(process.env.PGPORT!)
             },
             msgConfig: {
-                url: process.env.MSG_URL || "amqp://guest:guest@127.0.0.1:5672",                
+                url: process.env.MSG_URL || "amqp://guest:guest@127.0.0.1:5672",
+                queues: process.env.MSG_QUEUES ? process.env.MSG_QUEUES.split(",") : FormsMessagesQueues.QUEUES,                
             },
             authConfig: {
                 env: process.env,

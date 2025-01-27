@@ -1,19 +1,17 @@
-import { FormEvent, FormRoot, IndexType } from "@codeffekt/ce-core-data";
 import { Service } from "../core/CeService";
 import { RabbitMqClient } from "../rabbitmq/RabbitMqClient";
 import { EventListener } from "../events/EventListener";
 
 export interface MessagesServerConfig {
     url: string;
+    queues: string[];
 }
 
 @Service()
 export class MessagesServer {
 
     private messageClient?: RabbitMqClient;
-    private config: MessagesServerConfig;
-    private formsRootQueueId = "formsroot";
-    private formsQueueId = "forms";
+    private config: MessagesServerConfig;    
 
     constructor() {
 
@@ -24,7 +22,7 @@ export class MessagesServer {
         this.config = config;
         this.messageClient = await RabbitMqClient.fromConfig({
             url: this.config.url,
-            queues: [ this.formsQueueId, this.formsRootQueueId ]
+            queues: this.config.queues,
         });
         console.log(`[MessagesServer] RabbitMq client ${config.url}`);
     }
@@ -36,16 +34,11 @@ export class MessagesServer {
         }
     }
 
-    sendFormsRootUpsert(root: FormRoot, author: IndexType) {
-        this.messageClient?.sendToQueue<FormEvent>(this.formsRootQueueId, {
-            type: 'update',
-            elts: [root.id],
-            author,
-            time: root.mtime,
-        });
+    sendMessage<T>(queue: string, msg: T) {
+        this.messageClient?.sendToQueue<T>(queue, msg);
     }
 
-    setFormsRootEventListener(listener: EventListener) {
-        this.messageClient?.setConsumeListener(this.formsRootQueueId, listener);
-    }
+    setMessageListener<T>(queue: string, listener: EventListener<T>) {
+        this.messageClient?.setConsumeListener(queue, listener);
+    }    
 }

@@ -1,5 +1,6 @@
 import { Channel, connect, Connection } from "amqplib";
 import { EventListener } from "../events/EventListener";
+import { FormEvent } from "@codeffekt/ce-core-data";
 
 export interface RabbitMqClientConfig {
     url: string;
@@ -41,7 +42,7 @@ export class RabbitMqClient {
         this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)));
     }
 
-    setConsumeListener(queue: string, eventListener: EventListener) {        
+    setConsumeListener<T>(queue: string, eventListener: EventListener<T>) {        
         this.channel.consume(queue, (msg) => {
             if(!msg) {
                 return;
