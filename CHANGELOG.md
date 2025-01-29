@@ -1,3 +1,6 @@
+## [1.13.11]
+ - Refacto MessagesServer
+
 ## [1.13.10]
  - Add keep alive sse events
 

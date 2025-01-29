@@ -1,6 +1,5 @@
 import { Channel, connect, Connection } from "amqplib";
 import { EventListener } from "../events/EventListener";
-import { FormEvent } from "@codeffekt/ce-core-data";
 
 export interface RabbitMqClientConfig {
     url: string;
