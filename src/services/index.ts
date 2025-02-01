@@ -13,8 +13,5 @@ export * from './RemoteApiService';
 export * from './FormsApiTokensService';
 export * from './CeFormsInitService';
 export * from './ProcessingService';
-<<<<<<< Updated upstream
 export * from './WorkerModuleService';
-=======
 export * from './APIApplication';
->>>>>>> Stashed changes
