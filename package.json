@@ -23,7 +23,7 @@
     "@codeffekt/quickthumb": "0.0.14",
     "@types/jest": "^27.4.1",
     "amqplib": "^0.10.4",
-    "axios": "^0.25.0",
+    "axios": "^1.7.9",
     "bcrypt": "^5.0.1",
     "chalk": "^4.1.0",
     "command-line-args": "^5.2.1",
@@ -48,8 +48,7 @@
     "winston": "^3.3.3"
   },
   "peerDependencies": {
-    "@codeffekt/ce-core-data": "^1.2.1",
-    "axios": "^0.25.0"
+    "@codeffekt/ce-core-data": "^1.2.1"
   },
   "devDependencies": {
     "@codeffekt/ce-core-data": "^1.2.3",
