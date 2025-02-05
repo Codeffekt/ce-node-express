@@ -1,4 +1,4 @@
-import { FormFilter, FormQueryField, FormQueryFieldExpr, FormQueryFieldLogic, IndexType } from "@codeffekt/ce-core-data";
+import { FormFilter, FormQueryField, FormQueryFieldExpr, FormQueryFieldLogic } from "@codeffekt/ce-core-data";
 import { SqlFromTable } from "./SqlASTTypes";
 import { SqlFromSelect } from "./SqlFromSelect";
 import { SqlSelectProcess } from "./SqlSelectProcess";
@@ -139,7 +139,7 @@ export class SqlSelectBuilder {
         return isFormQueryField(ref) ?
             {
                 ref: this.getRefValueFromQueryField(ref),
-                form: `'${ref.value}'` ?? this.getIdValue()
+                form: ref.value ? `'${ref.value}'` : this.getIdValue()
             }
             : {
                 ref: `'${ref}'`,

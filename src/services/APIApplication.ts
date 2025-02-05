@@ -1,4 +1,5 @@
 import * as express from "express";
+import * as cors from "cors";
 import { Server } from "http";
 import { CeService, Service } from "../core/CeService";
 import { ExpressRouter } from "../express-router/ExpressRouter";
@@ -6,6 +7,7 @@ import { ErrorServer } from "../servers/ErrorServer";
 
 export interface APIApplicationConfig {
     routers: any[];
+    corsConfig?: any;
 }
 
 @Service()
@@ -22,6 +24,7 @@ export class APIApplication {
         this.config = config;
 
         this.app = express();
+        this.app.use(cors(this.config.corsConfig));
         this.app.use(express.json({ limit: '1000kb' }));
         this.app.use(express.urlencoded({ extended: true }));
 
