@@ -4,14 +4,14 @@ import { FormsRootService } from "../services/FormsRootService";
 
 export class FormRootDepsBuilder {
 
-    @Inject(FormsRootService)
-    private readonly formsService: FormsRootService;
+    /* @Inject(FormsRootService)
+    private readonly formsService: FormsRootService; */
 
-    private constructor(private root: IndexType) {}
+    private constructor(private root: IndexType, private formsService: FormsRootService) {}
 
-    static fromRoot(root: IndexType) {
+    static fromRoot(root: IndexType, formsService: FormsRootService) {
 
-        const builder = new FormRootDepsBuilder(root);        
+        const builder = new FormRootDepsBuilder(root, formsService);        
 
         return builder.getFormWithDeps();
     }

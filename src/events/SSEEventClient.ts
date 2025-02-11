@@ -1,13 +1,24 @@
 import { interval, Subscription } from "rxjs";
 import { JwtUserRequest } from "../core/Auth";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { NextFunction } from "express";
 import { Inject } from "../core/CeService";
 import { FormsService, FormsUpdateEvent } from "../services/FormsService";
-import { FormEvent } from "@codeffekt/ce-core-data";
-import { takeWhile } from "rxjs/operators";
+import { FormEvent, FormInstance } from "@codeffekt/ce-core-data";
+import { filter, map, takeWhile } from "rxjs/operators";
 
 const KEEP_ALIVE_INTERVAL = 30000; // 30s
+
+export type EventPredicate = (evt: FormInstance) => boolean;
+export type EventFilter = (evt: FormsUpdateEvent) => FormsUpdateEvent;
+
+export interface SSEEventClientConfig {
+    req: JwtUserRequest | Request;
+    res: Response;
+    next: NextFunction;    
+    predicate?: EventPredicate;
+    retrieveFormContent?: boolean;
+}
 
 export class SSEEventClient {    
 
@@ -21,14 +32,12 @@ export class SSEEventClient {
     private isActive = false;
 
     constructor(
-        private req: JwtUserRequest,
-        private res: Response,
-        private next: NextFunction) {
+        private config: SSEEventClientConfig) {
             this.isActive = true;
             this.writeInitialHeader();
             this.handleClose();
             this.sendInitialWelcomeData();
-            this.listenToEvents();
+            this.listenToEvents(this.config.predicate);
             this.sendKeepAlive();
     }
 
@@ -41,11 +50,11 @@ export class SSEEventClient {
             'Connection': 'keep-alive',
             'X-Accel-Buffering': 'no',
         };
-        this.res.writeHead(200, headers);
+        this.config.res.writeHead(200, headers);
     }
 
     private handleClose() {
-        this.req.on('close', () => {            
+        this.config.req.on('close', () => {            
             console.log("SSEEVENTCLIENT CLOSE");
             this.isActive = false;            
             this.subscription.unsubscribe();
@@ -54,8 +63,8 @@ export class SSEEventClient {
 
     private sendInitialWelcomeData() {        
         const data = 'data: Hello World!\n\n';
-        this.res.write(`event: init\n`);
-        this.res.write(data);
+        this.config.res.write(`event: init\n`);
+        this.config.res.write(data);
     }
 
     private sendKeepAlive() {
@@ -64,21 +73,26 @@ export class SSEEventClient {
         ).subscribe(() => this.sendInitialWelcomeData());
     }    
 
-    private listenToEvents() {
+    private listenToEvents(predicate?: EventPredicate) {
         this.subscription = this.formsService.formUpdate$.pipe(
             takeWhile(() => this.isActive),
+            map(evt => predicate ? ({
+                ...evt,
+                elts: evt.elts.filter(elt => predicate(elt)),                
+            }) : evt),
+            filter(evt => evt.elts.length > 0),
         ).subscribe(event => {            
             const data = `data: ${JSON.stringify(this.createFormEvent(event))}\n\n`;
             console.log("SSEEVENTCLIENT", data);
-            this.res.write(`event: message\n`);
-            this.res.write(data);            
+            this.config.res.write(`event: message\n`);
+            this.config.res.write(data);            
         });
     }
 
     private createFormEvent(updateEvent: FormsUpdateEvent): FormEvent {
         return {
             author: updateEvent.author,
-            elts: updateEvent.elts.map(elt => elt.id),
+            elts: this.config.retrieveFormContent ? updateEvent.elts : updateEvent.elts.map(elt => elt.id),
             type: 'update',
             time: Date.now()
         };

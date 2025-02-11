@@ -8,7 +8,9 @@ import {
 import { DatabaseServer } from "../servers/DatabaseServer";
 import { MessagesServer } from "../servers/MessagesServer";
 import { ContextService } from "./ContextService";
-import { FormMessageBuilder, FormsMessagesQueues } from "../forms";
+import { FormsMessagesQueues } from "../forms/FormsMessagesQueues";
+import { FormMessageBuilder } from "../forms/FormMessageBuilder";
+import { FormRootDepsBuilder } from "../forms/FormRootDepsBuilder";
 
 @Service()
 export class FormsRootService {
@@ -75,5 +77,9 @@ export class FormsRootService {
 
     async deleteFormsAssocIndices(ref: IndexType, indices: IndexType[]): Promise<boolean> {        
         return this.db.deleteFormsAssocIndices(ref, indices, this.dbTables);
+    }
+
+    async getFormWithDeps(root: IndexType) {
+        return FormRootDepsBuilder.fromRoot(root, this);
     }
 }

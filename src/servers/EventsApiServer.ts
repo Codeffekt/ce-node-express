@@ -14,6 +14,8 @@ export class EventsApiServer {
 
     @Get({ path: '/all' })
     getEvents(req: JwtUserRequest, res: Response, next: NextFunction) {
-        new SSEEventClient(req, res, next);
+        new SSEEventClient({
+            req, res, next
+        });
     }
 }

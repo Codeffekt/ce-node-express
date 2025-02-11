@@ -111,14 +111,14 @@ export function CeApiModule(params: CeApiModuleParams) {
                     },
                     params: undefined,
                     ...req.body
-                };
+                };                
 
                 if (params.__class == undefined || params.call == undefined || params.call.function == undefined) {
                     throw new Error("Missing class and/or function arguments");
                 }
 
                 const classInst = this.__findComponent(params.__class);
-                const callFunction = params.call.function;
+                const callFunction = params.call.function;                
 
                 if (!classInst.__haveApiFunc(callFunction)) {
                     throw new Error(`Unknow API function ${callFunction} in module ${params.__class}`);
@@ -128,13 +128,13 @@ export function CeApiModule(params: CeApiModuleParams) {
                 // used also for method access rights                    
                 classInst.__api_setContext(req, res, next);
 
-                let funcRes = API_ANSWER_OK;
+                let funcRes = API_ANSWER_OK;                                
 
                 if (params.call.params != undefined) {
 
                     if (!Array.isArray(params.call.params)) {
                         params.call.params = [params.call.params];
-                    }
+                    }                    
 
                     funcRes = (<any>classInst)[callFunction].apply(classInst, params.call.params);
 
