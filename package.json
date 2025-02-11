@@ -1,6 +1,6 @@
 {
   "name": "@codeffekt/ce-node-express",
-  "version": "1.13.11",
+  "version": "1.13.12",
   "description": "CeForms backend",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@codeffekt/ce-core-data": "^1.2.3",
+    "@codeffekt/ce-core-data": "^1.2.4",
     "@codeffekt/quickthumb": "0.0.14",
     "amqplib": "^0.10.4",
     "axios": "^1.7.9",
