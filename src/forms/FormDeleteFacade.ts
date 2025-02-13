@@ -8,6 +8,12 @@ import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 import { ForkFieldsUtils } from "./ForkFieldsUtils";
 
+export interface FormDeleteFacadeConfig {
+    includesFields?: IndexType[]; 
+    excludesFields?: IndexType[];
+    deleteFormsInArray?: boolean;
+}
+
 export class FormDeleteFacade {   
 
     @Inject(FormsService)
@@ -19,7 +25,7 @@ export class FormDeleteFacade {
     private deletedAssocs: FormAssoc[] = [];
     private deletedFormIds: IndexType[] = [];
 
-    constructor(private includesFields?: IndexType[], private excludesFields?: IndexType[]) { }
+    constructor(private config: FormDeleteFacadeConfig) { }
 
     async execute(id: IndexType) {
 
@@ -32,6 +38,11 @@ export class FormDeleteFacade {
 
         return true;
 
+    }
+
+    static fromFormId(id: IndexType, config: FormDeleteFacadeConfig) {
+        const deleteFacade = new FormDeleteFacade(config);
+        return deleteFacade.execute(id);
     }
 
     private async init(id: IndexType) {
@@ -61,12 +72,12 @@ export class FormDeleteFacade {
     }
 
     private async deleteArrayFields() {
-        if (!this.includesFields?.length) {
+        if (!this.config.includesFields?.length) {
             return;
         }
 
         const predWithFields = ForkFieldsUtils.getPredicateWithFields(
-            this.includesFields, this.excludesFields
+            this.config.includesFields, this.config.excludesFields
         );
         const predArray = ForkFieldsUtils.getPredicateArray();
 
@@ -85,7 +96,15 @@ export class FormDeleteFacade {
         }
 
         const ref = FormUtils.createFormAssocRef(this.id, block.field);
-        await this.formsService.deleteFormsAssoc(ref);
+
+        if(this.config.deleteFormsInArray) {
+            await this.formsService.deleteFormsQuery({
+                ref
+            });
+        }
+
+        await this.formsService.deleteFormsAssoc(ref);        
+        
     }
 
     private async deleteFormsAssocs() {
