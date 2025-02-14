@@ -112,8 +112,13 @@ export class FormMutateFacade {
         await this.createRootMutationFromIndices();
         await this.createRoot();
 
-        const formDelete = new FormDeleteFacade(this.mutation.fields?.includes, this.mutation.fields?.excludes);
-        return formDelete.execute(this.mutation.indices[0]);
+        return FormDeleteFacade.fromFormId(
+            this.mutation.indices[0],
+            {
+                includesFields: this.mutation.fields?.includes,
+                excludesFields: this.mutation.fields?.excludes,
+            }
+        );        
     }
 
     private async executeFormArrayCreation() {

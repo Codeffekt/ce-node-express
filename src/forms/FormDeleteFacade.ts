@@ -91,7 +91,7 @@ export class FormDeleteFacade {
     }
 
     private async deleteArray(block: FormBlock) {        
-        if(block.params.ref) {
+        if(block.params?.ref) {
             return;
         }
 
