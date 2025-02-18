@@ -103,7 +103,7 @@ export class AssetsService {
             elts: res.rows.map(row => createFormInstanceFromAsset(row.data)),
             limit: query.limit,
             offset: query.offset,
-            total: res.rows.length ? res.rows[0].total : 0
+            total: res.rows.length ? parseInt(res.rows[0].total as any) : 0,
         };
     }
 
