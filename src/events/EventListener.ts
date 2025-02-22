@@ -1,6 +1,6 @@
 
 export interface EventListener<T> {
 
-    onMessage(event: T);    
+    onMessage(queue: string, event: T);    
 
 }

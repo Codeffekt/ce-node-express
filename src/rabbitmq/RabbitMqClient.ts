@@ -18,17 +18,18 @@ export class RabbitMqClient {
     static async fromConfig(config: RabbitMqClientConfig) {
         const client = new RabbitMqClient(config);
         await client.connect();
+        await client.create_channel_queues();
         return client;
     }
 
     private async connect() {
-        this.connection = await connect(this.config.url);
+        this.connection = await connect(this.config.url);        
+    }
+
+    private async create_channel_queues() {
         this.channel = await this.connection.createChannel();             
         for(const queue of this.config.queues) {
-            this.channel.assertQueue(queue, {
-                durable: false
-            });
-            console.log(`[RabbitMqClient] create queue ${queue}`);
+            await this.register_queue(queue);
         }
     }
 
@@ -46,7 +47,14 @@ export class RabbitMqClient {
             if(!msg) {
                 return;
             }
-            eventListener.onMessage(JSON.parse(msg.content.toString()));
+            eventListener.onMessage(queue, JSON.parse(msg.content.toString()));
         }, { noAck: true })
+    }
+
+    async register_queue(queue: string) {
+        await this.channel.assertQueue(queue, {
+            durable: false
+        });
+        console.log(`[RabbitMqClient] create queue ${queue}`);
     }
 }

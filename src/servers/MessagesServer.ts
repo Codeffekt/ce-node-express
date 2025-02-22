@@ -40,5 +40,10 @@ export class MessagesServer {
 
     setMessageListener<T>(queue: string, listener: EventListener<T>) {
         this.messageClient?.setConsumeListener(queue, listener);
-    }    
+    } 
+    
+    async registerMessageListener<T>(queue: string, listener: EventListener<T>) {        
+        await this.messageClient?.register_queue(queue);
+        this.setMessageListener<T>(queue, listener);
+    }
 }
