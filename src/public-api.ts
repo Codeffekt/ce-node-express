@@ -1,9 +1,7 @@
 
 export * from './core';
 
-export * from './forms-sql/FormQueryParser';
-export * from './forms-sql/SqlRenderer';
-
+export * from './forms-sql';
 export * from './express-router';
 export * from './tokens';
 export * from './servers';

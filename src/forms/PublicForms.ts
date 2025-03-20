@@ -17,6 +17,7 @@ import { FormCopyFacade } from "./FormCopyFacade";
 import { FormsRootService } from "../services/FormsRootService";
 import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
 import { FormsQueryArrayFacade } from "./FormsQueryArrayFacade";
+import { FormPathQuery } from "./FormPathQuery";
 
 @CeApiComponent()
 export class PublicForms {
@@ -125,6 +126,11 @@ export class PublicForms {
   @CeApiCall
   getFormQuery(id: IndexType, query: FormQuery) {
     return this.formsService.getFormQuery(id, query);
+  }
+
+  @CeApiCall
+  async getFormQueryPath(id: IndexType, path: string): Promise<FormInstance> {
+    return FormPathQuery.fromPath(id, path);
   }
 
   @CeApiCall

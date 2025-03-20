@@ -24,7 +24,7 @@ export class SqlWhereGraphNode {
     generate_select(): string {
         const tables = this.generate_tables();
         const where = this.generate_where();
-        return `select forms.data->>'id' as id, forms.data->'root' as root from forms, ${tables}
+        return `select forms.data as data from forms, ${tables}
          where ${where}`;
     }
 
@@ -35,13 +35,13 @@ export class SqlWhereGraphNode {
 
     private generate_where(): string {
         let prev = this.contexts[0];
-        let where = `forms.data->>'id'=${prev.alias}.id`;
-        for (let i = 1; i < this.contexts.length - 1; ++i) {
+        let where = `${prev.alias}.fa_form='${this.searchId}'`;        
+        for (let i = 1; i < this.contexts.length; ++i) {
             const current = this.contexts[i];
-            where = `${where} ${prev.alias}.fa_form=${current.alias}.id`;
+            where = `${where} and ${current.alias}.fa_form=${prev.alias}.id`;            
             prev = current;
-        }
-        where = `${where} and ${prev}.fa_form='${this.searchId}'`;
+        }        
+        where = `${where} and forms.data->>'id'=${prev.alias}.id`;
         return where;
     }
 }

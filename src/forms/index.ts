@@ -20,6 +20,7 @@ export * from './FormFactoryCreateFacade';
 export * from './FormsQueryArrayFacade';
 export * from './FormsMessagesQueues';
 export * from './FormMessageBuilder';
+export * from './FormPathQuery';
 export * from "./PublicForms";
 export * from "./PublicFormsVersion";
 export * from "./PublicFormsRoot";

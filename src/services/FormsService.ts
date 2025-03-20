@@ -22,6 +22,7 @@ import { FormsQueryProcess } from "./FormsQueryProcess";
 import { SqlInsertBuilder } from "../forms-sql/SqlInsertBuilder";
 import { SqlDeleteBuilder } from "../forms-sql/SqlDeleteBuilder";
 import { SqlUpdate } from "../forms-sql/SqlUpdate";
+import { SqlGraphNodeContext, SqlWhereGraphNode } from "../forms-sql";
 
 const QUERY_FORMS_ASSOC = `select (select count(*) from forms, forms_assoc where ref=$1 and data->>'id'=form) as total, 
 data from forms, forms_assoc where ref=$1 and data->>'id'=form`;
@@ -302,6 +303,13 @@ export class FormsService {
     sanitizeForm(form: FormInstanceExt, author?: IndexType, mtime?: number) {
         return this.context.sanitizeForm(form, author, mtime);
     }    
+
+    async queryGraphNode(contexts: SqlGraphNodeContext[], formId: IndexType): Promise<FormInstance> {
+        const graphNode = new SqlWhereGraphNode(contexts, formId);
+        const query = graphNode.generate_select();        
+        const res = await this.db.poolProject.query(query);
+        return res.rows.length ? res.rows[0].data : undefined;
+    }
 
     private async formHaveIndexBlock(formId: IndexType) {
         const form = await this.getForm(formId);
