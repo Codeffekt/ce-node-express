@@ -2,6 +2,7 @@ import { APIError, APIRouteError, API_STATUS_UNKNOWN } from "@codeffekt/ce-core-
 import { NextFunction, Response, Request } from "express";
 import { Service } from "../core/CeService";
 import { AppUse, Controller, Use } from "../express-router/ExpressRouter";
+import { StatusError } from "../core/Errors";
 @Service()
 @Controller({ path: '/' })
 export class ErrorServer {   
@@ -25,7 +26,13 @@ export class ErrorServer {
         }
 
         if(err instanceof Error) {
-            res.status(500);
+            
+            if(err instanceof StatusError) {
+                res.status(err.status);
+            } else {
+                res.status(500);
+            }
+            
             res.json({
                 status: {
                     code: API_STATUS_UNKNOWN

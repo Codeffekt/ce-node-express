@@ -42,4 +42,12 @@ export class FormsApiServer {
     async __callApi(req: JwtUserRequest, res: Response, next: NextFunction) {
         throw new Error(`Must be overloaded by CeApiModule`);
     }
+
+    __addComponents(components: any[]) {
+        throw new Error(`Must be overloaded by CeApiModule`);
+    }
+
+    addComponents(components: any[]) {
+        this.__addComponents(components);
+    }
 }

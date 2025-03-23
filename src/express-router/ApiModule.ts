@@ -83,6 +83,15 @@ export function CeApiModule(params: CeApiModuleParams) {
             constr: c
         }));
 
+        constr.prototype.__addComponents = function (components: any[]) {
+            const newServices = components.map(c => ({
+                id: c.prototype.__params.id,
+                instance: undefined,
+                constr: c
+            }));
+            this.__services = this.__services.concat(newServices);
+        };
+
         constr.prototype.__findComponent = function (id: string) {
 
             const service = this.__services.find(s => s.id === id);
