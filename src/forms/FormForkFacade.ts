@@ -18,7 +18,7 @@ const ARRAY_COPY_FORMS_LIMIT = 40;
 const ARRAY_COPY_ASSOCS_LIMIT = 40;
 
 export interface CreateOptions {
-    pid: IndexType;
+    pid?: IndexType;
     fid: IndexType;
     creatorId?: IndexType;
     block?: FormBlock;
@@ -29,7 +29,7 @@ export class FormForkFacade {
 
     private newForms: FormInstance[] = [];
     private newAssocs: FormAssoc[] = [];
-    private project: FormInstance;
+    private project?: FormInstance;
     private formSource: FormInstance;
     private formForked: FormInstance;
 
@@ -69,10 +69,10 @@ export class FormForkFacade {
         await this.copyAssocFields();
     }
 
-    private async init(pid: IndexType, fid: IndexType) {
+    private async init(pid: IndexType | undefined, fid: IndexType) {
         this.newForms = [];
         this.newAssocs = [];
-        this.project = await this.projectsService.getProject(pid);
+        this.project = pid ? await this.projectsService.getProject(pid) : undefined;
         this.formSource = await this.formsService.getFormQuery(fid, { extMode: true });
     }
 
@@ -105,7 +105,7 @@ export class FormForkFacade {
                 ForkFieldsUtils.removeFieldPath(block.field, this.forkExcludesFields)
             );
             const batch = await builder.createBatched({
-                pid: this.project.id,
+                pid: this.project?.id,
                 fid: requiredFormSource.id,
                 block,
                 parent: this.formForked,
