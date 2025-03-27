@@ -1,3 +1,11 @@
+## [1.14.0]
+ - feat: you can now add a Public component dynamically
+ - feat: graph node query
+ - feat: dyn message queue
+ - fix: res total assets
+ - fix: delete
+ - ref: sse event client
+
 ## [1.13.11]
  - Refacto MessagesServer
 
