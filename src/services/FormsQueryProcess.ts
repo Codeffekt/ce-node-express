@@ -42,8 +42,8 @@ export class FormsQueryProcess {
         try {            
             await client.query('BEGIN');
             // await client.query('SET join_collapse_limit = 1);
-            await client.query("CREATE TEMP sequence if not exists temp_seq");
-            await client.query("SELECT setval('temp_seq', 1)");
+            // await client.query("CREATE TEMP sequence if not exists temp_seq");
+            // await client.query("SELECT setval('temp_seq', 1)");
             const dbRes = await client.query<ResFormRow>(queryDB);            
             await client.query('COMMIT');            
             return this.processRes(query, dbRes);                        
@@ -102,6 +102,21 @@ export class FormsQueryProcess {
                 }
             });
         }
+
+        if(query.nodes?.length) {
+            dbRes.rows.forEach((row: ResFormRow) => {
+                const curElt: FormInstanceExt = row.data;
+                if(!curElt.nodes) {
+                    curElt.nodes = {};
+                }
+                for(const node of query.nodes) {
+                    if(row[`gn_${node.name}`]) {
+                        curElt.nodes[node.name] = row[`gn_${node.name}`];
+                    }
+                }
+            });
+        }
+
         return res;
     }
 

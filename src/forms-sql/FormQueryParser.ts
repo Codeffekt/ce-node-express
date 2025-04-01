@@ -1,5 +1,6 @@
 import {
     FormAggField,
+    FormNode,
     FormQuery, FormQueryField,
     FormQueryFieldExpr, FormQuerySortField
 } from "@codeffekt/ce-core-data";
@@ -20,6 +21,7 @@ import { SqlWhereFilterBuilder } from "./SqlWhereFilterBuilder";
 import { SqlWhereRootFactory } from "./SqlWhereRootFactory";
 import { SqlQueryField, SqlQueryFieldParent } from "./SqlQueryField";
 import { FormQueryFieldUtils } from "./FormQueryFieldUtils";
+import { SqlWhereGraphNode } from "./SqlGraphNode";
 
 // select forms.total as total, forms.data as data from 
 // (select count(*) over() as total, forms.data as data from 
@@ -55,13 +57,13 @@ export class FormQueryParser {
                 alias: "data"
             },
             {
-                field: "nextval('temp_seq')",
+                field: "row_number() over()",
                 alias: "row_number"
             }
         ]);
 
         const aggFields = this.query.aggFields?.length ?
-            this.createAggFields() : [];
+            this.createAggFields() : [];        
 
         const select = new SqlSelect({
             fields: [
@@ -73,7 +75,7 @@ export class FormQueryParser {
                     field: this.getDataField(),
                     alias: "data"
                 },
-                ...aggFields
+                ...aggFields,                
             ],
             from: [
                 selectFields
@@ -85,6 +87,8 @@ export class FormQueryParser {
                 }
             ]
         });
+
+        this.addNodesPart(select);
 
         this.addExtModePart(select);
 
@@ -118,14 +122,14 @@ export class FormQueryParser {
 
     private createAggFields() {
         return this.query.aggFields.map(agg => this.createAggField(agg));
-    }
+    }    
 
     private createAggField(agg: FormAggField): SqlSelectFieldsElt {
         return {
             field: this.exprAggFactory.create(agg, this.options.rootTableName),
             alias: `agg_${agg.field}`
         };
-    }
+    }    
 
     private getDataField(context?: string) {
         return `${this.options.rootTableName}${context ? `_${context}` : ''}.data`;
@@ -141,6 +145,25 @@ export class FormQueryParser {
 
     private getSortTableAlias(qs: FormQuerySortField) {
         return `s_obj_${qs.context ? `${qs.context}_` : ''}${qs.field}`;
+    }
+
+    private addNodesPart(select: SqlSelect) {
+        if(!this.query.nodes?.length) {
+            return;
+        }
+
+        const nodes = this.query.nodes;
+
+        for(const node of nodes) {
+            select.addField(SqlWhereGraphNode.createSelectField(node));
+            select.addFrom(SqlWhereGraphNode.createTable(node));            
+        }
+
+        for(let i = 0; i < nodes.length - 1; ++i) {
+            select.addWhereAnd(SqlWhereGraphNode.createWhereIntermediate(nodes[i], nodes[i+1]));
+        }
+
+        select.addWhereAnd(SqlWhereGraphNode.createWhere(nodes[nodes.length - 1]));
     }
 
     private addExtModePart(select: SqlSelect) {
@@ -161,7 +184,7 @@ export class FormQueryParser {
             on: new SqlWhereExprElt({ field: "f_forms.data->>'id'", op: "=", value: "f_obj.value->>'value'" })
         });
 
-        select.setWhereRoot(new SqlWhereExprElt({ field: "f_obj.value->>'type'", op: "=", value: "'index'" }));
+        select.addWhereAnd(new SqlWhereExprElt({ field: "f_obj.value->>'type'", op: "=", value: "'index'" }));
     }
 
     private addQueryFieldsRootPart(select: SqlFromSelect) {

@@ -1,7 +1,6 @@
 import { SqlRenderer } from "../../src/forms-sql/SqlRenderer";
 import { FormQuery } from "@codeffekt/ce-core-data";
 import { FormQueryParser } from "../../src/forms-sql/FormQueryParser";
-import { DB_TABLE_ACCOUNTS, DB_TABLE_FORMS, DB_TABLE_FORMS_ASSOC, DB_TABLE_FORMSROOT } from "../../src/core/Db";
 
 const queryBase: FormQuery = {
     limit: 10,
@@ -12,7 +11,7 @@ const queryBase: FormQuery = {
 const queryWithRootFields: FormQuery = {
     ...queryBase,
     queryFields: [{
-        field: "forms",
+        field: "samples",
         op: "=",
         type: "formAssoc",
         onMeta: true,
@@ -22,10 +21,4 @@ const queryWithRootFields: FormQuery = {
     }],   
 };
 
-console.log(SqlRenderer.renderSQLFromSqlAST(new FormQueryParser(queryWithRootFields, {
-    formsTableName: DB_TABLE_FORMS, 
-    formsRootTableName: DB_TABLE_FORMSROOT,
-    assocsTableName: DB_TABLE_FORMS_ASSOC,
-    accountsTableName: DB_TABLE_ACCOUNTS,
-    rootTableName: DB_TABLE_FORMSROOT, 
-}).toAST()));
+console.log(SqlRenderer.renderSQLFromSqlAST(new FormQueryParser(queryWithRootFields).toAST()));
