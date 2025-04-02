@@ -1,3 +1,6 @@
+## [1.14.1]
+ - feat: graph node query now supported in FormQuery
+
 ## [1.14.0]
  - feat: you can now add a Public component dynamically
  - feat: graph node query
