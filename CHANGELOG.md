@@ -1,3 +1,6 @@
+## [1.14.2]
+ - feat: assets query now support originalname query field
+
 ## [1.14.1]
  - feat: graph node query now supported in FormQuery
 

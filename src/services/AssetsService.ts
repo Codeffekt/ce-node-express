@@ -85,12 +85,15 @@ export class AssetsService {
 
     async getFormsQuery(query: FormQuery): Promise<DbArrayRes<FormInstance>> {
         const qfMimeTypes: FormQueryField<string> = Array.isArray(query.queryFields) ? query.queryFields.find((qf: any) => qf.field && qf.field === "mimetype") as FormQueryField<string> : undefined;
-        const queryMimeString = qfMimeTypes !== undefined && qfMimeTypes.values ? `data->>'mimetype'=ANY(ARRAY[${qfMimeTypes.values.map(m => `'${m}'`).join(',')}]::text[])` : undefined;
+        const queryMimeString = qfMimeTypes !== undefined && qfMimeTypes.values ? `data->>'mimetype'=ANY(ARRAY[${qfMimeTypes.values.map(m => `'${m}'`).join(',')}]::text[])` : undefined; 
+        const qfOriginalName: FormQueryField<string> = Array.isArray(query.queryFields) ? query.queryFields.find((qf: any) => qf.field && qf.field === "originalname") as FormQueryField<string> : undefined;
+        const queryOriginalNameString = qfOriginalName !== undefined && qfOriginalName.value ? `data->>'originalname'='${qfOriginalName.value}'` : undefined;       
         const queryRef = query.ref ? `ref='${query.ref}'` : undefined;
         const queryIndices = query.indices?.length ? `data->>'id'=ANY(ARRAY[${query.indices.map(id => `'${id}'`).join(',')}]::text[])` : undefined;
 
         const whereExprs = [
             queryMimeString,
+            queryOriginalNameString,
             queryRef,
             queryIndices
         ].filter(elt => elt !== undefined);
