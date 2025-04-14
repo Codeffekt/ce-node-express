@@ -48,10 +48,11 @@ export interface DiagApiAccessParams {
 
 export interface CeApiModuleParams {
     components: any[];
+    disableEventClientFwd?: boolean;
 }
 
 export interface CeApiComponentParams {
-    id?: string;
+    id?: string;    
 }
 
 declare type ArgMapFunc = (ctx: any, arg?: any) => any;
@@ -74,10 +75,10 @@ export interface ApiComponent {
     __api_setContext(req: JwtUserRequest, res: Response, next: NextFunction): void;
 }
 
-export function CeApiModule(params: CeApiModuleParams) {
+export function CeApiModule(moduleParams: CeApiModuleParams) {
     return function classDecorator<T extends { new(...args: any[]): {} }>(constr: T) {
-        
-        constr.prototype.__services = params.components.map(c => ({
+
+        constr.prototype.__services = moduleParams.components.map(c => ({
             id: c.prototype.__params.id,
             instance: undefined,
             constr: c
@@ -108,7 +109,7 @@ export function CeApiModule(params: CeApiModuleParams) {
         };
 
         constr.prototype.__callApi = async function (req: JwtUserRequest, res: Response, next: NextFunction) {
-            try {
+            try {                
 
                 const params: ApiCallParams = {
                     __token: undefined,
@@ -120,14 +121,14 @@ export function CeApiModule(params: CeApiModuleParams) {
                     },
                     params: undefined,
                     ...req.body
-                };                
+                };
 
                 if (params.__class == undefined || params.call == undefined || params.call.function == undefined) {
                     throw new Error("Missing class and/or function arguments");
                 }
 
                 const classInst = this.__findComponent(params.__class);
-                const callFunction = params.call.function;                
+                const callFunction = params.call.function;
 
                 if (!classInst.__haveApiFunc(callFunction)) {
                     throw new Error(`Unknow API function ${callFunction} in module ${params.__class}`);
@@ -137,13 +138,13 @@ export function CeApiModule(params: CeApiModuleParams) {
                 // used also for method access rights                    
                 classInst.__api_setContext(req, res, next);
 
-                let funcRes = API_ANSWER_OK;                                
+                let funcRes = API_ANSWER_OK;
 
                 if (params.call.params != undefined) {
 
                     if (!Array.isArray(params.call.params)) {
                         params.call.params = [params.call.params];
-                    }                    
+                    }
 
                     funcRes = (<any>classInst)[callFunction].apply(classInst, params.call.params);
 
@@ -159,7 +160,9 @@ export function CeApiModule(params: CeApiModuleParams) {
                 };
 
                 const finalRes = await Promise.resolve(funcRes);
-                CeService.get(CeEventClient).fwd(msg, req.user.data.diagAccount);
+                if (!moduleParams.disableEventClientFwd) {
+                    CeService.get(CeEventClient).fwd(msg, req.user.data.diagAccount);
+                }
                 res.json(finalRes != undefined ? finalRes : {});
             } catch (err) {
                 next(err);
@@ -170,7 +173,7 @@ export function CeApiModule(params: CeApiModuleParams) {
 }
 
 export function CeApiComponent(params?: CeApiComponentParams) {
-    return function classDecorator<T extends { new(...args: any[]): {} }>(constr: T) {        
+    return function classDecorator<T extends { new(...args: any[]): {} }>(constr: T) {
         constr.prototype.__params = {
             ...constr.prototype.__params,
             id: params && params.id ? params.id : constr.name

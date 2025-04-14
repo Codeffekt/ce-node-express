@@ -1,3 +1,6 @@
+## [1.14.3]
+ - feat: add option in CeApiModule to disable the event client
+
 ## [1.14.2]
  - feat: assets query now support originalname query field
 
