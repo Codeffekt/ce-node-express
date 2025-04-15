@@ -3,66 +3,53 @@ import {
     FormInstanceExt, FormMutate, FormQuery,
     FormRoot, IndexType,
 } from "@codeffekt/ce-core-data";
-import Axios, { AxiosRequestConfig } from "axios";
 import * as dotenv from "dotenv";
 import { Service } from "../core/CeService";
+import { APIClient, APIClientConfig } from "../client";
 
-export interface RemoteApiConfig {
-    server: string;
-    learning: string;
-    token: string;
-}
+export type RemoteApiConfig = APIClientConfig;
 
 @Service()
-export class RemoteApiService {
+export class RemoteApiService {    
 
-    private config: RemoteApiConfig;
+    private client: APIClient;
 
     constructor() { }
 
     initConfigFromEnv() {
         dotenv.config({ path: ".env.remote" });
-        this.config = {
-            server: process.env.SERVER_MODE ? process.env[`SERVER_${process.env.SERVER_MODE}`] : process.env.SERVER,
-            learning: process.env.SERVER_MODE ? process.env[`LEARNING_${process.env.SERVER_MODE}`] : process.env.LEARNING,
+        this.setConfig({
+            server: process.env.SERVER_MODE ? process.env[`SERVER_${process.env.SERVER_MODE}`] : process.env.SERVER,            
             token: process.env.TOKEN
-        };
+        });
     }
 
     setConfig(config: RemoteApiConfig) {
-        this.config = config;
+        this.client = new APIClient(config);        
     }
 
     getConfig() {
-        return this.config;
+        return this.client.getConfig();
     }
-
-    async self() {
-        const res = await Axios.get(
-            this.getSelf(),
-            this.getHeaders()
-        );
-        return res.data;
-    }
-
+    
     getProject(pid: IndexType): Promise<FormInstance> {
         return this.callProject("getProject", pid);
     }
 
     callProject(func: string, ...params: any[]): Promise<any> {
-        return this.call.apply(this, ["PublicProject", func].concat(params));
+        return this.client.callAPI("PublicProject", func, params);
     }
 
     callForms(func: string, ...params: any[]): Promise<any> {
-        return this.call.apply(this, ["PublicForms", func].concat(params));
+        return this.client.callAPI("PublicForms", func, params);
     }
 
     callFormsRoot(func: string, ...params: any[]): Promise<any> {
-        return this.call.apply(this, ["PublicFormsRoot", func].concat(params));
+        return this.client.callAPI("PublicFormsRoot", func, params);
     }
 
     callAccounts(func: string, ...params: any[]): Promise<any> {
-        return this.call.apply(this, ["PublicAccounts", func].concat(params));
+        return this.client.callAPI("PublicAccounts", func, params);
     }
 
     callFormsQuery(pid: IndexType, query: FormQuery) {
@@ -99,75 +86,5 @@ export class RemoteApiService {
 
     formMutation(mutation: FormMutate): Promise<boolean> {
         return this.callForms("formMutation", mutation);
-    }
-
-    callLearningProcess(pid: IndexType, sid: IndexType) {
-        return this._call_rest_get(this.getLearningApi(`process/${pid}/${sid}`), this.getHeaders());
-    }
-
-    private call<T>(...params: any[]): Promise<T> {
-        return this._call.bind(this, this.getApi.bind(this) as any, this.getCallPost, this.getHeaders()).apply(this, params) as any;
-    }
-
-    private async _call<T>(getApiFunc: () => string, msgFunc: () => any, options: AxiosRequestConfig, ...params: any[]): Promise<T> {
-        console.log("_call", getApiFunc());
-        console.log("_params", msgFunc.apply(this, params as any));
-        console.log(options);
-        const res = await Axios.post<T>(
-            getApiFunc(),
-            msgFunc.apply(this, params as any),
-            options
-        );
-        return res.data;
-    }
-
-    private _call_rest_get(url: string, options: AxiosRequestConfig) {
-        return Axios.get<any>(
-            url,
-            options
-        );
-    }
-
-    private getLearningApi(endpoint: string): string {
-        return `${this.config.learning}/${endpoint}`;
-    }
-
-    private getApi(): string {
-        return `${this.config.server}/api`;
-    }
-
-    private getSelf(): string {
-        return `${this.config.server}/api/self`;
-    }
-
-    private getHeaders() {
-        return {
-            headers: { Authorization: `Bearer ${this.config.token}` }
-        };
-    }
-
-    private getCallPost(className: string, func: any, ...others: any[]) {
-
-        interface CallParams {
-            function: string;
-            params?: any[];
-        }
-
-        interface PostMessage {
-            __class: string;
-            call: CallParams;
-        }
-
-        const post: PostMessage = {
-            "__class": className,
-            "call": { "function": func }
-        };
-
-        if (others.length > 0) { // remove null && undefined parameters in array
-            post.call.params = Array.isArray(others) ? others.filter(e => e !== undefined && e !== null) : others;
-        }
-
-        return post;
-    }
-
+    }        
 }

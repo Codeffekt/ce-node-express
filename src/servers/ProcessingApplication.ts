@@ -121,8 +121,7 @@ export class ProcessingApplication {
 
     private initRemoteApi() {
         this.remoteApiService.setConfig({
-            server: this.config.server ?? process.env.CE_FORMS_BASE_URL,
-            learning: null,
+            server: this.config.server ?? process.env.CE_FORMS_BASE_URL,           
             token: this.config.token ?? process.env.CE_FORMS_TOKEN,
         });
     }

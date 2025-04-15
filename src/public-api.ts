@@ -1,6 +1,6 @@
 
 export * from './core';
-
+export * from './client';
 export * from './forms-sql';
 export * from './express-router';
 export * from './tokens';
