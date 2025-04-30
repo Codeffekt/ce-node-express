@@ -93,48 +93,43 @@ export class DbConfigService {
     }
 
     async clearDatabase() {
-        await this.db.poolProject.query(`drop database if exists ${this.config.dbName}`);
-        await this.db.poolProject.query(`drop user if exists ${this.config.userName}`);
+        await this.db.query(`drop database if exists ${this.config.dbName}`);
+        await this.db.query(`drop user if exists ${this.config.userName}`);
     }
 
     private async clearTable(dbName: string) {
-        await this.db.poolProject.query(`delete from ${dbName}`);
+        await this.db.query(`delete from ${dbName}`);
     }
 
     private async checkDatabase(dbName: string) {
-        const res = await this.db.poolProject.query(`select * from pg_database where datname='${dbName}'`);
+        const res = await this.db.query(`select * from pg_database where datname='${dbName}'`);
         return res.rowCount > 0;
     }
 
     private async checkUser(userName: string) {
-        const res = await this.db.poolProject.query(`select * from pg_user where usename='${userName}'`);
+        const res = await this.db.query(`select * from pg_user where usename='${userName}'`);
         return res.rowCount > 0;
-    }
-
-    private async checkTable(tableName: string) {
-        const res = await this.db.poolProject.query(`SELECT * FROM information_schema.tables where table_schema='public' and table_name='${tableName}'`);
-        return res.rowCount > 0;
-    }
+    }    
 
     private async createDatabase(dbName: string) {
-        await this.db.poolProject.query(`create database ${dbName}`);
+        await this.db.query(`create database ${dbName}`);
     }
 
     private async createUser(userName: string, password: string) {
-        await this.db.poolProject.query(`create user ${userName} with password '${password}'`);
+        await this.db.query(`create user ${userName} with password '${password}'`);
     }
 
     private async grantUserPrivileges(userName: string, dbName: string) {
-        await this.db.poolProject.query(`grant all privileges on database ${dbName} to ${userName}`);
+        await this.db.query(`grant all privileges on database ${dbName} to ${userName}`);
     }
 
     private async grantPublicSchemaPrivileges(userName: string) {
-        await this.db.poolProject.query(`GRANT ALL ON SCHEMA public TO ${userName}`);
+        await this.db.query(`GRANT ALL ON SCHEMA public TO ${userName}`);
     }
 
     private async createTableAccounts() {
 
-        const haveTable = await this.checkTable(DB_TABLE_ACCOUNTS);
+        const haveTable = await this.db.checkTable(DB_TABLE_ACCOUNTS);
 
         if (haveTable) {
             return;
@@ -150,7 +145,7 @@ export class DbConfigService {
     }
 
     private async createTableAssets() {
-        const haveTable = await this.checkTable(DB_TABLE_ASSETS);
+        const haveTable = await this.db.checkTable(DB_TABLE_ASSETS);
 
         if (haveTable) {
             return;
@@ -165,7 +160,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsRoot() {
-        const haveTable = await this.checkTable(DB_TABLE_FORMSROOT);
+        const haveTable = await this.db.checkTable(DB_TABLE_FORMSROOT);
 
         if (haveTable) {
             return;
@@ -184,7 +179,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsFromName(tableName: string): Promise<boolean> {
-        const haveTable = await this.checkTable(tableName);
+        const haveTable = await this.db.checkTable(tableName);
 
         if (haveTable) {
             return false;
@@ -211,7 +206,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsVersion() {
-        const haveTable = await this.checkTable(DB_TABLE_FORMS_VERSION);
+        const haveTable = await this.db.checkTable(DB_TABLE_FORMS_VERSION);
 
         if (haveTable) {
             return;
@@ -226,7 +221,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsEvent() {
-        const haveTable = await this.checkTable(DB_TABLE_FORMS_EVENT);
+        const haveTable = await this.db.checkTable(DB_TABLE_FORMS_EVENT);
 
         if (haveTable) {
             return;
@@ -236,7 +231,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsToken() {
-        const haveTable = await this.checkTable(DB_TABLE_FORMS_TOKEN);
+        const haveTable = await this.db.checkTable(DB_TABLE_FORMS_TOKEN);
 
         if (haveTable) {
             return;
@@ -249,7 +244,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsAssoc() {
-        const haveTable = await this.checkTable(DB_TABLE_FORMS_ASSOC);
+        const haveTable = await this.db.checkTable(DB_TABLE_FORMS_ASSOC);
 
         if (haveTable) {
             return;
@@ -263,7 +258,7 @@ export class DbConfigService {
     }
 
     private async createTableFormsRootAssoc() {
-        const haveTable = await this.checkTable(DB_TABLE_FORMSROOT_ASSOC);
+        const haveTable = await this.db.checkTable(DB_TABLE_FORMSROOT_ASSOC);
 
         if (haveTable) {
             return;
@@ -277,7 +272,7 @@ export class DbConfigService {
     }
 
     private async createTableProjects() {
-        const haveTable = await this.checkTable(DB_TABLE_PROJECTS);
+        const haveTable = await this.db.checkTable(DB_TABLE_PROJECTS);
 
         if (haveTable) {
             return;
@@ -310,7 +305,7 @@ export class DbConfigService {
         END;
         $$ LANGUAGE plpgsql;
         `;
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
     }
 
     private async createMergeRecursiveFunc() {
@@ -331,7 +326,7 @@ export class DbConfigService {
         full join jsonb_each(delta) e2(keyDelta, valDelta) on keyOrig = keyDelta
         $$
         `;
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
     }
 
     private async createTriggers(tableName: string) {
@@ -348,23 +343,6 @@ export class DbConfigService {
     }
 
     private async doTransaction(queries: string[]) {
-
-        if (!queries.length) {
-            return;
-        }
-
-        const client = await this.db.poolProject.connect();
-        try {
-            await client.query('BEGIN');
-            for (const query of queries) {
-                await client.query(query);
-            }
-            await client.query('COMMIT');
-        } catch (e) {
-            await client.query('ROLLBACK');
-            throw e;
-        } finally {
-            client.release();
-        }
+        await this.db.transactions(queries);        
     }
 }

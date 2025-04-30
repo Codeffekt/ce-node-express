@@ -2,7 +2,7 @@ import { AccountSettings, FormRoot, IndexType, FormInstanceExt, FormAssoc, FormQ
 import { Client, Pool, PoolConfig } from "pg";
 import { ReplaySubject } from "rxjs";
 import { OldProject } from "../core";
-import { DbTablesOption } from "../core/Db";
+import { DbQueryConfigValues, DbQueryResults, DbServer, DbTablesOption } from "../core/Db";
 import { Service } from "../core/CeService";
 import { SqlDeleteBuilder } from "../forms-sql/SqlDeleteBuilder";
 import { SqlInsertBuilder } from "../forms-sql/SqlInsertBuilder";
@@ -37,9 +37,9 @@ export interface TableUpdateEvent {
 }
 
 @Service()
-export class DatabaseServer {
+export class DatabaseServer implements DbServer {
 
-    poolProject: Pool;
+    private poolProject: Pool;
     tableUpdateClient: Client;
 
     tableUpdate$: ReplaySubject<TableUpdateEvent> = new ReplaySubject();
@@ -50,6 +50,30 @@ export class DatabaseServer {
     private cachedFormsAdmin: FormInstanceExt[];
 
     constructor() {
+    }
+
+    async query<T, I = any[]>(q: string, values?: DbQueryConfigValues<I>): Promise<DbQueryResults> {
+        return this.poolProject.query<T>(q, values);
+    }
+    
+    async transactions(queries: string[]) {
+        if (!queries.length) {
+            return;
+        }
+
+        const client = await this.poolProject.connect();
+        try {
+            await client.query('BEGIN');
+            for (const query of queries) {
+                await client.query(query);
+            }
+            await client.query('COMMIT');
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
     }
 
     async setConfig(configProject: PoolConfig) {        
@@ -164,6 +188,11 @@ export class DatabaseServer {
             SqlDeleteBuilder.fromFormAssocIndices(ref, indices, tables)
         );
         return true;
+    }
+
+    async checkTable(tableName: string) {
+        const res = await this.query(`SELECT * FROM information_schema.tables where table_schema='public' and table_name='${tableName}'`);
+        return res.rowCount > 0;
     }
 
     private async listenTableUpdate(configProject: any) {

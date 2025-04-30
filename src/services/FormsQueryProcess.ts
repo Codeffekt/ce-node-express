@@ -1,8 +1,8 @@
 import { DbArrayRes, FormAggField, FormInstance, FormInstanceExt, FormQuery, IndexType } from "@codeffekt/ce-core-data";
-import { QueryResult } from "pg";
 import { FormQueryParser, FormQueryParserOptions } from "../forms-sql/FormQueryParser";
 import { SqlRenderer } from "../forms-sql/SqlRenderer";
 import { DatabaseServer } from "../servers/DatabaseServer";
+import { DbQueryResults } from "../core";
 
 function addAggFieldsToResForm(res: any, row: any, aggFields: FormAggField[]) {
     if (!res.fields) {
@@ -33,30 +33,18 @@ export class FormsQueryProcess {
 
         console.log("[FormsQueryProcess] == query begin");
         console.log(queryDB);
-        console.log("[FormsQueryProcess] == query end");        
+        console.log("[FormsQueryProcess] == query end");                    
 
-        
-
-        const client = await this.db.poolProject.connect();        
-
-        try {            
-            await client.query('BEGIN');
-            // await client.query('SET join_collapse_limit = 1);
-            // await client.query("CREATE TEMP sequence if not exists temp_seq");
-            // await client.query("SELECT setval('temp_seq', 1)");
-            const dbRes = await client.query<ResFormRow>(queryDB);            
-            await client.query('COMMIT');            
+        try {                                 
+            const dbRes = await this.db.query<ResFormRow>(queryDB);                                
             return this.processRes(query, dbRes);                        
-        } catch (e) {
-            await client.query('ROLLBACK');
+        } catch (e) {            
             console.error(e);
             throw e;
-        } finally {
-            client.release();
-        }        
+        }     
     }
 
-    private processRes(query: FormQuery, dbRes: QueryResult<ResFormRow>) {
+    private processRes(query: FormQuery, dbRes: DbQueryResults<ResFormRow>) {
         const res: DbArrayRes<FormInstanceExt> = {
             total: dbRes.rows.length ? parseInt(dbRes.rows[0].total as any) : 0, // TODO: pourquoi parseInt ?
             limit: query.limit,

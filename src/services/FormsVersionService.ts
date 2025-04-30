@@ -127,7 +127,7 @@ export class FormsVersionService {
     }
 
     async upsertForm(src: FormInstance): Promise<FormInstance> {
-        await this.db.poolProject.query("insert into forms_version(data) values($1) on conflict((data->>'id')) do update set data=$1",
+        await this.db.query("insert into forms_version(data) values($1) on conflict((data->>'id')) do update set data=$1",
             [JSON.stringify(src)])
         return src;
     }
@@ -156,7 +156,7 @@ export class FormsVersionService {
     private async getLastCommits(ids: IndexType[]): Promise<FormInstance[]> {
         const values = ids.map(id => `'${id}'`).join(',');
         const res = await
-            this.db.poolProject.query(
+            this.db.query(
                 `select data from forms_version where data->'version'->'next' is null and data->'version'->>'head'=ANY(ARRAY[${values}]::text[])`
             );
         return res.rows.map(row => row.data);
@@ -164,7 +164,7 @@ export class FormsVersionService {
 
     private async insertForms(elts: FormInstance[]): Promise<boolean> {
         const query = format(`insert into forms_version(data) values %L on conflict((data->>'id')) do update set data=excluded.data`, elts.map(elt => [elt]));
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
         return true;
     }
 }

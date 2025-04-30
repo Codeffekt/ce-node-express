@@ -84,7 +84,7 @@ export class FormsApiTokensService {
 
         // delete forms
         let queryDB = `delete from forms_token where data->>'id' in (${queryFields})`;
-        await this.db.poolProject.query(queryDB);
+        await this.db.query(queryDB);
 
         return true;
     }
@@ -99,7 +99,7 @@ export class FormsApiTokensService {
     }
 
     private async upsertForm(src: FormInstance) {
-        await this.db.poolProject.query("insert into forms_token(data) values($1) on conflict((data->>'author')) do update set data=$1",
+        await this.db.query("insert into forms_token(data) values($1) on conflict((data->>'author')) do update set data=$1",
             [JSON.stringify(src)])
         return src;
     }

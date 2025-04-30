@@ -17,3 +17,16 @@ export interface DbTablesOption {
     accountsTableName: string;
     rootTableName: string;
 }
+
+export interface DbQueryResults<R = any> {
+    rows: R[];
+    rowCount: number;
+}
+
+export type DbQueryConfigValues<T> = T extends Array<infer U> ? T : never;
+
+export interface DbServer {
+    query<T, I = any[]>(q: string, values?: DbQueryConfigValues<I>): Promise<DbQueryResults>;    
+    transactions(queries: string[]): Promise<void>;
+    checkTable(tableName: string): Promise<boolean>;
+}

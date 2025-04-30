@@ -49,12 +49,12 @@ export class FormsAdminService {
     }
 
     deleteFormAdmin(id: IndexType): Promise<boolean> {
-        return this.db.poolProject.query("delete from formsadmin where data->>'id'=$1", [id])
+        return this.db.query("delete from formsadmin where data->>'id'=$1", [id])
             .then((res: any) => res.rowCount > 0);
     }
 
     async upsertFormAdmin(src: FormInstance): Promise<FormInstance> {
-        await this.db.poolProject.query("insert into formsadmin(data) values($1) on conflict((data->>'id')) do update set data=$1",
+        await this.db.query("insert into formsadmin(data) values($1) on conflict((data->>'id')) do update set data=$1",
             [JSON.stringify(src)])
         return src;
     }

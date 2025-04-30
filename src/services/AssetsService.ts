@@ -79,7 +79,7 @@ export class AssetsService {
         const queryMimeString = mimetypes !== undefined ? `and data->>'mimetype'=ANY(ARRAY[${mimetypes.map(m => `'${m}'`).join(',')}]::text[])` : '';
         const queryLimit = limit > 0 ? `limit ${limit} offset ${offset}` : '';
         const query = `select * from assets where ref='${ref}' ${queryMimeString} order by (data->>'ctime')::bigint desc ${queryLimit}`;
-        const res = await this.db.poolProject.query(query);
+        const res = await this.db.query(query);
         return res.rows.map((elt: any) => elt.data);
     }
 
@@ -101,7 +101,7 @@ export class AssetsService {
         const queryLimit = `limit ${query.limit} offset ${query.offset}`;
         const whereOp = whereExprs.length ? 'where' : '';        
         const queryString = `select count(*) over() as total, data from assets ${whereOp} ${whereExprs.join(" and ")} order by (data->>'ctime')::bigint desc ${queryLimit}`;          
-        const res = await this.db.poolProject.query(queryString);
+        const res = await this.db.query(queryString);
         return {
             elts: res.rows.map(row => createFormInstanceFromAsset(row.data)),
             limit: query.limit,
@@ -111,16 +111,16 @@ export class AssetsService {
     }
 
     getAssetsCount(ref: IndexType): Promise<number> {
-        return this.db.poolProject.query("select count(*) as total from assets where ref=$1", [ref])
+        return this.db.query("select count(*) as total from assets where ref=$1", [ref])
             .then((res: any) => res.rows.length ? res.rows[0].total : undefined);
     }
 
     getAsset(id: IndexType): Promise<AssetElt> {
-        return this.get_with_id(this.db.poolProject, AssetsService.DB_ASSETS, id);
+        return this.get_with_id(this.db, AssetsService.DB_ASSETS, id);
     }
 
     deleteAsset(id: IndexType): Promise<boolean> {
-        return this.db.poolProject.query("delete from assets where data->>'id'=$1", [id]).then(() => true);
+        return this.db.query("delete from assets where data->>'id'=$1", [id]).then(() => true);
     }
 
     async deleteAssets(ref?: IndexType, ids: IndexType[] = []): Promise<boolean> {        
@@ -133,18 +133,18 @@ export class AssetsService {
         const queryRef = ref ? `ref='${ref}' and` : '';
         const query = `delete from assets where ${queryRef}
             data->>'id'=ANY(ARRAY[${idsListStr}]::text[])`;        
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
         return true;
     }
 
     async insertAsset(ref: IndexType, elt: AssetElt): Promise<AssetElt> {
-        await this.fill_table_ref(this.db.poolProject, AssetsService.DB_ASSETS,
+        await this.fill_table_ref(this.db, AssetsService.DB_ASSETS,
             [[ref, elt]]);
         return elt;
     }
 
     updateAsset(elt: AssetElt): Promise<AssetElt> {
-        return this.update_table(this.db.poolProject, AssetsService.DB_ASSETS, [elt]).then(_ => elt);
+        return this.update_table(this.db, AssetsService.DB_ASSETS, [elt]).then(_ => elt);
     }
 
     private async update_table(pool: any, tableName: string, elts: any[]) {

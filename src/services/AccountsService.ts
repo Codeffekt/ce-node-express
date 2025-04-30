@@ -79,7 +79,7 @@ export class AccountsService {
 
         this.db.clearCachedAccounts();
         const query = `update accounts set data='${JSON.stringify(account)}' where data->>'id'='${account.id}'`;
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
         this.accountUpdate$.next({ elts: [account], author });
         return account;
     }
@@ -95,7 +95,7 @@ export class AccountsService {
 
         const query = format(`insert into accounts(data) values %L on conflict((data->>'login')) do update set data=excluded.data`,
             accounts.map(elt => [elt]));
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
         this.accountUpdate$.next({ elts: accounts, author });
         return true;
     }
@@ -104,7 +104,7 @@ export class AccountsService {
 
         this.db.clearCachedAccounts();
         const query = `insert into accounts(data) values('${JSON.stringify(account)}')`;
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
 
         const formAccount = FormAccountBuilder.fromAccount(account, account.id);
         await this.formsService.insertForm(formAccount.core, account.id);
@@ -117,7 +117,7 @@ export class AccountsService {
         await this.formsService.deleteForms([id]);
 
         this.db.clearCachedAccounts();
-        await this.db.poolProject.query("delete from accounts where data->>'id'=$1", [id]);
+        await this.db.query("delete from accounts where data->>'id'=$1", [id]);
         return true;
     }
 

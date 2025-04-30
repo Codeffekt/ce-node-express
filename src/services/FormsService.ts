@@ -6,7 +6,6 @@ import {
     FormRoot, FormUtils, FORM_MASK_ROOT, FORM_STYLE_ROOT, IFormRootEntity, IndexType, Utils,
     FormBlockType
 } from "@codeffekt/ce-core-data";
-import * as format from "pg-format";
 import { ReplaySubject } from "rxjs";
 import { filter } from "rxjs/operators";
 import { Inject, Service } from "../core/CeService";
@@ -70,12 +69,12 @@ export class FormsService {
     }    
 
     deleteFormRoot(id: IndexType): Promise<boolean> {
-        return this.db.poolProject.query("delete from formsroot where data->>'id'=$1", [id])
+        return this.db.query("delete from formsroot where data->>'id'=$1", [id])
             .then((res: any) => res.rowCount > 0);
     }    
 
     async updateForm(src: FormInstance, author: IndexType): Promise<FormInstance> {
-        await this.db.poolProject.query(`update forms set data=$1 where data->>'id'=$2`,
+        await this.db.query(`update forms set data=$1 where data->>'id'=$2`,
             [JSON.stringify(src), src.id]);
         this.formUpdate$.next({ elts: [src], author });
         return src;
@@ -84,12 +83,12 @@ export class FormsService {
     async clearBlocksValue(type: FormBlockType, values: IndexType[]): Promise<boolean> {                
         const queryDB = SqlUpdate.clearFromBlock(type, values);
         console.log("[clearBlocksValue]", queryDB);
-        await this.db.poolProject.query(queryDB);        
+        await this.db.query(queryDB);        
         return true;
     }
 
     async getForm(id: IndexType): Promise<FormInstance> {
-        const res = await this.db.poolProject.query(`select data from forms where data->>'id'=$1`, [id]);
+        const res = await this.db.query(`select data from forms where data->>'id'=$1`, [id]);
         if (!res.rows.length) {
             throw new EltNotFoundError("element id=" + id + " not found", { tableName: 'forms', id: id });
         }
@@ -141,7 +140,7 @@ export class FormsService {
     }
 
     async insertFormAssoc(assoc: FormAssoc): Promise<FormAssoc> {
-        await this.db.poolProject.query(
+        await this.db.query(
             SqlInsertBuilder.fromFormAssoc(assoc, this.dbTables)
         );        
         return assoc;
@@ -151,14 +150,14 @@ export class FormsService {
         if(!elts?.length) {
             return true;
         }
-        await this.db.poolProject.query(
+        await this.db.query(
             SqlInsertBuilder.fromFormsAssoc(elts, this.dbTables)
         );        
         return true;
     }
 
     async insertForm(elt: FormInstance, author: IndexType): Promise<FormInstance> {
-        await this.db.poolProject.query("insert into forms (data) values($1)", [JSON.stringify(elt)]);
+        await this.db.query("insert into forms (data) values($1)", [JSON.stringify(elt)]);
         this.formUpdate$.next({ elts: [elt], author });
         return elt;
     }
@@ -168,14 +167,15 @@ export class FormsService {
             return true;
         }
 
-        const query = format(`insert into forms(data) values %L on conflict((data->>'id')) do update set data=excluded.data`, elts.map(elt => [elt]));
-        await this.db.poolProject.query(query);
+        const values = elts.map(elt => `'${JSON.stringify(elt)}'`).join(",");
+        
+        await this.db.query(`insert into forms(data) values($1) on conflict((data->>'id')) do update set data=excluded.data`, [values]);
         this.formUpdate$.next({ elts, author });
         return true;
     }
 
     async deleteFormAssoc(assoc: FormAssoc): Promise<boolean> {
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssoc(assoc, this.dbTables));
+        await this.db.query(SqlDeleteBuilder.fromFormAssoc(assoc, this.dbTables));
         return true;
     }
 
@@ -186,7 +186,7 @@ export class FormsService {
 
         const values = elts.map(elt => `'${elt}'`).join(',');
         const query = `delete from forms where data->>'id'=ANY(ARRAY[${values}]::text[])`;
-        await this.db.poolProject.query(query);
+        await this.db.query(query);
         return true;
     }
 
@@ -196,22 +196,22 @@ export class FormsService {
 
         // delete forms
         let queryDB = `delete from forms where data->>'id' in (${queryFields})`;
-        await this.db.poolProject.query(queryDB);
+        await this.db.query(queryDB);
 
         // delete formsAssoc
         queryDB = `delete from forms_assoc where form in (${queryFields})`;
-        await this.db.poolProject.query(queryDB);
+        await this.db.query(queryDB);
 
         return true;
     }
 
     async deleteFormsAssoc(ref: IndexType): Promise<boolean> {
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssocRef(ref, this.dbTables));
+        await this.db.query(SqlDeleteBuilder.fromFormAssocRef(ref, this.dbTables));
         return true;
     }
 
     async deleteFormsAssocFromForm(form: IndexType): Promise<boolean> {
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormAssocForm(form, this.dbTables));
+        await this.db.query(SqlDeleteBuilder.fromFormAssocForm(form, this.dbTables));
         return true;
     }
 
@@ -219,11 +219,11 @@ export class FormsService {
         if (!assocs?.length) {
             return false;
         }        
-        await this.db.poolProject.query(SqlDeleteBuilder.fromFormsAssoc(assocs, this.dbTables));
+        await this.db.query(SqlDeleteBuilder.fromFormsAssoc(assocs, this.dbTables));
     }
 
     async deleteFormsAssocIndices(ref: IndexType, indices: IndexType[]): Promise<boolean> {        
-        await this.db.poolProject.query(
+        await this.db.query(
             SqlDeleteBuilder.fromFormAssocIndices(ref, indices, this.dbTables)
         );
         return true;
@@ -236,7 +236,7 @@ export class FormsService {
         const sqlCTimeRangeInf = query.cTimeRange && query.cTimeRange[0] ? `and (data->>'ctime')::bigint >= ${query.cTimeRange[0]}` : '';
         const sqlCTimeRangeSup = query.cTimeRange && query.cTimeRange[1] ? `and (data->>'ctime')::bigint < ${query.cTimeRange[1]}` : '';
 
-        const query$ = this.db.poolProject.query(`${sqlQuery} ${sqlCTimeRangeInf} ${sqlCTimeRangeSup} ${sqlCTimeOrder} ${sqlLimit}`, [query.ref]);
+        const query$ = this.db.query(`${sqlQuery} ${sqlCTimeRangeInf} ${sqlCTimeRangeSup} ${sqlCTimeOrder} ${sqlLimit}`, [query.ref]);
 
         return query$.then((res: any) => ({
             total: res.rows.length ? res.rows[0].total : 0,
@@ -250,7 +250,7 @@ export class FormsService {
         const sqlQuery = `select (select count(*) from ${this.dbTables.assocsTableName} where ref=$1) as total, 
         ref, form from ${this.dbTables.assocsTableName} where ref=$1`;
         const sqlLimit = query.limit > 0 ? `limit ${query.limit} offset ${query.offset}` : '';
-        const res = await this.db.poolProject.query(`${sqlQuery} ${sqlLimit}`, [query.ref]);
+        const res = await this.db.query(`${sqlQuery} ${sqlLimit}`, [query.ref]);
         return {
             total: res.rows.length ? res.rows[0].total : 0,
             limit: query.limit,
@@ -307,7 +307,7 @@ export class FormsService {
     async queryGraphNode(contexts: SqlGraphNodeContext[], formId: IndexType): Promise<FormInstance> {
         const graphNode = new SqlWhereGraphNode(contexts, formId);
         const query = graphNode.generate_select();        
-        const res = await this.db.poolProject.query(query);
+        const res = await this.db.query(query);
         return res.rows.length ? res.rows[0].data : undefined;
     }
 
