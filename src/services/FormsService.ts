@@ -9,6 +9,7 @@ import {
 import { ReplaySubject } from "rxjs";
 import { filter } from "rxjs/operators";
 import { Inject, Service } from "../core/CeService";
+import * as format from "pg-format";
 import { 
     DB_TABLE_ACCOUNTS, DB_TABLE_FORMS, 
     DB_TABLE_FORMSROOT, 
@@ -166,10 +167,9 @@ export class FormsService {
         if(!elts?.length) {
             return true;
         }
-
-        const values = elts.map(elt => `'${JSON.stringify(elt)}'`).join(",");
         
-        await this.db.query(`insert into forms(data) values($1) on conflict((data->>'id')) do update set data=excluded.data`, [values]);
+        const query = format(`insert into forms(data) values %L on conflict((data->>'id')) do update set data=excluded.data`, elts.map(elt => [elt]));
+        await this.db.query(query);
         this.formUpdate$.next({ elts, author });
         return true;
     }

@@ -52,7 +52,7 @@ export class DatabaseServer implements DbServer {
     constructor() {
     }
 
-    async query<T, I = any[]>(q: string, values?: DbQueryConfigValues<I>): Promise<DbQueryResults> {
+    async query<T, I = any[]>(q: string, values?: DbQueryConfigValues<I>): Promise<DbQueryResults> {        
         return this.poolProject.query<T>(q, values);
     }
     
