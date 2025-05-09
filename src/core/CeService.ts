@@ -22,7 +22,7 @@ export function Service(params?: CeServiceParams) {
     };
 }
 
-export function Inject(identifier) {
+export function Inject(identifier) {    
     return function (target: Object, propertyKey: string) {
         const setter = () => {
             throw new Error(`Cannot change injected property ${propertyKey}`);

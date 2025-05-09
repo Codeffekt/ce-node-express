@@ -14,7 +14,7 @@ export class FormAccountBuilder {
             id: account.id,
             ctime: account.ctime,
             mtime: account.mtime,
-            type: FormAccount.ROOT,
+            cat: FormAccount.ROOT,
             content: {
                 account: FormBlockBuilder.asTextFromObj(account, "account", "Account"),
                 login: FormBlockBuilder.asTextFromObj(account, "login", "Login"),

@@ -35,7 +35,7 @@ export class FormsApiServer {
     }
 
     @Use({ path: '/' } as any)
-    async callApi(req: JwtUserRequest, res: Response, next: NextFunction) {               
+    async callApi(req: JwtUserRequest, res: Response, next: NextFunction) {                 
         this.__callApi(req, res, next);
     }
 

@@ -7,7 +7,7 @@ export class Roots {
             "id": "forms-account",
             "ctime": 1678806237183,
             "title": "Formulaire utilisateur",
-            "type": "forms-account",
+            "cat": "forms-account",
             "content": {
                 "lang": {
                     "type": "text",
@@ -55,7 +55,7 @@ export class Roots {
             "id": "forms-project",
             "ctime": 1678806237181,
             "title": "Formulaire projet",
-            "type": "forms-project",
+            "cat": "forms-project",
             "content": {
                 "name": {
                     "type": "text",
@@ -94,7 +94,7 @@ export class Roots {
             "id": "forms-sharing",
             "ctime": 1678806237163,
             "title": "Formulaire partage",
-            "type": "forms-sharing",
+            "cat": "forms-sharing",
             "content": {
                 "id": {
                     "type": "text",
@@ -126,7 +126,7 @@ export class Roots {
             "id": "forms-processing",
             "ctime": 1678806237163,
             "title": "Formulaire Processing",
-            "type": "forms-processing",
+            "cat": "forms-processing",
             "content": {
                 "status": {
                     "type": "text",
@@ -172,7 +172,7 @@ export class Roots {
             "id": "forms-processing-params",
             "ctime": 1678806237163,
             "title": "Paramètres de processing",
-            "type": "forms-processing-params",
+            "cat": "forms-processing-params",
             "content": {
             }
         },
@@ -180,7 +180,7 @@ export class Roots {
             "id": "forms-processing-endpoint",
             "ctime": 1678806237163,
             "title": "Processing enpoint",
-            "type": "forms-processing-endpoint",
+            "cat": "forms-processing-endpoint",
             "content": {
                 "server": {
                     "type": "text",
@@ -199,7 +199,7 @@ export class Roots {
             "ctime": 1620049568340,
             "mtime": 1665653692841,
             "title": "Mask",
-            "type": "forms-mask",
+            "cat": "forms-mask",
             "content": {
                 "mask": {
                     "type": "mask",
@@ -233,7 +233,7 @@ export class Roots {
             "ctime": 1639560491556,
             "mtime": 1665653546119,
             "title": "Application",
-            "type": "forms-app",
+            "cat": "forms-app",
             "content": {
                 "name": {
                     "type": "text",
@@ -291,7 +291,7 @@ export class Roots {
             "ctime": 1641285670088,
             "mtime": 1641399335789,
             "title": "Formulaire Export",
-            "type": "forms-export",
+            "cat": "forms-export",
             "content": {
                 "cols": {
                     "type": "object",
