@@ -44,13 +44,13 @@ export class ForkFieldsUtils {
 
     static getPredicateArray() {
         return (block: FormBlock) => (
-            (block.type === "formArray") && (block.root)
+            (block.type === "formArray") && (block.root !== undefined)
         );
     }
 
     static getPredicateAssoc() {
         return (block: FormBlock) => (
-            (block.type === "formAssoc") && (block.root)
+            (block.type === "formAssoc") && (block.root !== undefined)
         );
     }
 

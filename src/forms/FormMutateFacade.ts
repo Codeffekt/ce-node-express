@@ -90,7 +90,10 @@ export class FormMutateFacade {
         await this.createRoot();
         const actors = this.mutation.props?.length ?
             FormCreatorBuilder.fromPreFilledProps(this.mutation.props) : [];
-        const formBuilder = new FormCreateFromRootFacade(actors);
+        const formBuilder = new FormCreateFromRootFacade({
+            actors,
+            flushCreatedData: true,
+        });
         return formBuilder.createFromRoot(this.root.id, this.mutation.author);
     }
 
@@ -118,7 +121,7 @@ export class FormMutateFacade {
                 includesFields: this.mutation.fields?.includes,
                 excludesFields: this.mutation.fields?.excludes,
             }
-        );        
+        );
     }
 
     private async executeFormArrayCreation() {

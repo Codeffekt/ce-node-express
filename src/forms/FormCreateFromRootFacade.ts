@@ -1,27 +1,41 @@
-import { EltNotFoundError, FormAssoc, FormInstance, FormUtils, FormWrapper, IndexType } from "@codeffekt/ce-core-data";
+import {
+    EltNotFoundError, FormInstance,
+    FormsBatchData, FormUtils,
+    FormWrapper, IndexType
+} from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 import { FormTemplateBuilder } from "./template/FormTemplateBuilder";
 import { FormCreateActor, FormCreatorBuilder } from "./FormCreatorActor";
+
+export interface FormCreateFromRootFacadeOptions {
+    actors: FormCreateActor[];
+    flushCreatedData: boolean;
+}
 
 export class FormCreateFromRootFacade {
 
     @Inject(FormsService)
     private readonly formsService: FormsService;
 
-    private newForms: FormInstance[] = [];
-    private newAssocs: FormAssoc[] = [];
+    private newData: FormsBatchData = {
+        forms: [],
+        assocs: []
+    };
+
     private form: FormInstance;
 
-    constructor(private actors: FormCreateActor[] = []) {
+    constructor(private options: FormCreateFromRootFacadeOptions) {
 
     }
 
-    static fromPartialContent(root: IndexType, author: IndexType, partialContent?: any) {
-        const creator = new FormCreateFromRootFacade(
-            partialContent ? [ FormCreatorBuilder.fromPartialContent(root, partialContent) ] : [] 
-          );
-        return creator.createFromRoot(root, author);
+    static async fromPartialContent(root: IndexType, author: IndexType, partialContent?: any) {
+        const creator = new FormCreateFromRootFacade({
+            actors: partialContent ? [FormCreatorBuilder.fromPartialContent(root, partialContent)] : [],
+            flushCreatedData: true
+        });
+        const form = await creator.createFromRoot(root, author);
+        return form;
     }
 
     async createFromRoot(root: IndexType, author: IndexType): Promise<FormInstance> {
@@ -29,13 +43,23 @@ export class FormCreateFromRootFacade {
             await this.createWrapper(root, author);
             await this.createRequiredSubForms(author);
             this.applyActors();
-            await this.insertRequiredSubForms(author);            
-            await this.addFormsToAssoc();
-        } catch(err) {
+            if (this.options.flushCreatedData) {
+                await this.flushNewCreatedData(author);
+            }
+        } catch (err) {
             console.error(err);
         }
 
         return this.form;
+    }
+
+    getNewCreatedData() {
+        return this.newData;
+    }
+
+    private async flushNewCreatedData(author: IndexType) {
+        await this.insertRequiredSubForms(author);
+        await this.addFormsToAssoc();
     }
 
     private async createWrapper(root: IndexType, authorId: IndexType) {
@@ -48,22 +72,25 @@ export class FormCreateFromRootFacade {
     }
 
     private async insertRequiredSubForms(author?: IndexType) {
-        if (this.newForms && this.newForms.length) {
-            await this.formsService.insertForms(this.newForms, author);
+        if (this.newData.forms.length) {
+            await this.formsService.insertForms(this.newData.forms, author);
         }
     }
 
     private async addFormsToAssoc() {
-        if (this.newAssocs && this.newAssocs.length) {
-            await this.formsService.insertFormsAssoc(this.newAssocs);
+        if (this.newData.assocs.length) {
+            await this.formsService.insertFormsAssoc(this.newData.assocs);
         }
     }
 
     private async createRequiredSubForms(authorId: IndexType) {
         const requiredForms = this.formsService.getRequiredFormsFromRoot(this.form);
 
-        this.newForms = [this.form];
-        this.newAssocs = [];
+        this.newData = {
+            main: this.form,
+            forms: [this.form],
+            assocs: []
+        };
 
         for (const block of requiredForms) {
             const root = await this.formsService.getFormRoot(block.root);
@@ -76,17 +103,17 @@ export class FormCreateFromRootFacade {
                 this.setSubFormFieldParentIndex(block.index, this.form.id, form);
             }
 
-            this.newForms.push(form);
-            this.newAssocs = [{ ref: this.form.id, form: form.id }];
+            this.newData.forms.push(form);
+            this.newData.assocs.push({ ref: this.form.id, form: form.id });
 
             FormWrapper.setFormValue(block.field, form.id, this.form);
         }
     }
 
     private applyActors() {
-        if (this.actors?.length && this.newForms?.length) {
-            for (const actorFunction of this.actors) {
-                for (const newForm of this.newForms) {
+        if (this.options.actors?.length && this.newData.forms.length) {
+            for (const actorFunction of this.options.actors) {
+                for (const newForm of this.newData.forms) {
                     actorFunction(newForm);
                 }
             }

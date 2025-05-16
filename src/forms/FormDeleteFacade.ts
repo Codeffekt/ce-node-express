@@ -11,6 +11,7 @@ import { ForkFieldsUtils } from "./ForkFieldsUtils";
 export interface FormDeleteFacadeConfig {
     includesFields?: IndexType[]; 
     excludesFields?: IndexType[];
+    includeAllFields?: boolean;
     deleteFormsInArray?: boolean;
 }
 
@@ -72,11 +73,11 @@ export class FormDeleteFacade {
     }
 
     private async deleteArrayFields() {
-        if (!this.config.includesFields?.length) {
+        if (!this.config.includesFields?.length && !this.config.includeAllFields) {
             return;
         }
 
-        const predWithFields = ForkFieldsUtils.getPredicateWithFields(
+        const predWithFields = this.config.includeAllFields ? (_) => true : ForkFieldsUtils.getPredicateWithFields(
             this.config.includesFields, this.config.excludesFields
         );
         const predArray = ForkFieldsUtils.getPredicateArray();
