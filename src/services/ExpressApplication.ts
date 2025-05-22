@@ -147,7 +147,7 @@ export class ExpressApplication {
         return this.config;
     }
 
-    async checkAppInstallation() {
+    async checkAppInstallation(forceClearAndInstall = false) {
 
         console.info(`Checking installation and database access...`);
 
@@ -158,7 +158,7 @@ export class ExpressApplication {
             await SimpleDBApp.init();               
             await SimpleDBApp.close();   
             
-            if(process.env.CE_FORCE_START_APP === "true") {
+            if(forceClearAndInstall || process.env.CE_FORCE_START_APP === "true") {
                 await this.startAppInstallation();
             }
     
@@ -184,7 +184,7 @@ export class ExpressApplication {
         console.info(`Installation OK`);
     }
 
-    private async startAppInstallation() {
+    private async startAppInstallation(forceClearAndInstall = false) {
         try {
             const admin = CeService.get(DbConfigService);
             const initService = CeService.get(CeFormsInitService);
@@ -200,7 +200,7 @@ export class ExpressApplication {
                     account: process.env.CE_FORMS_ACCOUNT,
                     passwd: process.env.CE_FORMS_PASSWD,
                 },
-                clearTables: process.env.CE_START_APP_CLEAR_TABLE === "true"
+                clearTables: forceClearAndInstall || process.env.CE_START_APP_CLEAR_TABLE === "true"
             });
             await SimpleDBApp.close();
         } catch(err) {
