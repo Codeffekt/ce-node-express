@@ -37,19 +37,19 @@ export class RemoteApiService {
     }
 
     callProject(func: string, ...params: any[]): Promise<any> {
-        return this.client.callAPI("PublicProject", func, params);
+        return this.client.callAPI("PublicProject", func, ...params);
     }
 
     callForms(func: string, ...params: any[]): Promise<any> {
-        return this.client.callAPI("PublicForms", func, params);
+        return this.client.callAPI("PublicForms", func, ...params);
     }
 
     callFormsRoot(func: string, ...params: any[]): Promise<any> {
-        return this.client.callAPI("PublicFormsRoot", func, params);
+        return this.client.callAPI("PublicFormsRoot", func, ...params);
     }
 
     callAccounts(func: string, ...params: any[]): Promise<any> {
-        return this.client.callAPI("PublicAccounts", func, params);
+        return this.client.callAPI("PublicAccounts", func, ...params);
     }
 
     callFormsQuery(pid: IndexType, query: FormQuery) {
@@ -66,6 +66,10 @@ export class RemoteApiService {
 
     getFormQueryProject(pid: IndexType, id: IndexType, creator: IndexType, query: FormQuery): Promise<FormInstanceExt> {
         return this.callProject("getFormQuery", pid, id, creator, query);
+    }
+
+    getFormsQueryArray(id: IndexType, field: IndexType, query: FormQuery): Promise<DbArrayRes<FormInstance>> {
+        return this.callForms("getFormsQueryArray", id, field, query);
     }
 
     getFormQueryGeneric(id: IndexType, query: FormQuery): Promise<FormInstance> {

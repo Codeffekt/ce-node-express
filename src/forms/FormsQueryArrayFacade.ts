@@ -52,10 +52,12 @@ export class FormsQueryArrayFacade {
             throw new IncorrectFormatError(`Form block ${this.field} has no root type`);
         }
 
+        const queryField = arrayBlock.params?.useCategory ? "cat" : "root";
+
         return {            
             ref: arrayBlock.params?.ref ?? FormUtils.createFormAssocRef(form.id, arrayBlock.field),
             queryFields: [{
-                field: "root",
+                field: queryField,
                 onMeta: true,
                 op: "=",
                 value: arrayBlock.root

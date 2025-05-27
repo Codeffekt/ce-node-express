@@ -21,7 +21,7 @@ export class APIClient {
         return this.config;
     }
 
-    callAPI<T = any>(moduleName, func: string, ...params: any[]): Promise<T> {
+    callAPI<T = any>(moduleName, func: string, ...params: any[]): Promise<T> {        
         return this.call.apply(this, [moduleName, func].concat(params));
     }
 
@@ -68,9 +68,9 @@ export class APIClient {
     }
 
     private async _call<T>(getApiFunc: () => string, msgFunc: () => any, options: AxiosRequestConfig, ...params: any[]): Promise<T> {
-        console.log("_call", getApiFunc());
+        /* console.log("_call", getApiFunc());
         console.log("_params", msgFunc.apply(this, params as any));
-        console.log(options);
+        console.log(options); */
         const res = await Axios.post<T>(
             getApiFunc(),
             msgFunc.apply(this, params as any),

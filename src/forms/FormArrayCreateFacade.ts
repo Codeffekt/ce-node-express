@@ -12,12 +12,12 @@ export class FormArrayCreateFacade {
     @Inject(FormsService)
     private readonly formsService: FormsService;
 
-    private root: FormInstanceBase;
+    private formRoot: FormInstanceBase;
     private arrayBlock: FormBlock;
     private form: FormInstance;
     private formElt: FormInstance;
 
-    constructor(private pid: IndexType, private id: IndexType, private arrayField: string) { }
+    constructor(private pid: IndexType, private id: IndexType, private arrayField: string, private root?: IndexType) { }
 
     async execute(author?: IndexType) {
         await this.retrieveForm();
@@ -39,18 +39,28 @@ export class FormArrayCreateFacade {
             throw new EltNotFoundError(`Block ${this.arrayField} does not exist`, this.arrayField);
         }
 
-        if (this.arrayBlock.type !== 'formArray' || !this.arrayBlock.root) {
-            throw new IncorrectFormatError(`Block ${this.arrayField} does not have sufficiant parameters`, this.arrayBlock);
+        if (this.arrayBlock.type !== 'formArray') {
+            throw new IncorrectFormatError(`Block ${this.arrayField} is not a formArray type`, this.arrayBlock);
         }
 
-        this.root = await this.formsService.getFormRoot(this.arrayBlock.root);       
+        if(!this.arrayBlock.root) {
+            throw new IncorrectFormatError(`Block ${this.arrayField} has not root property`, this.arrayBlock);
+        }
+
+        if(this.arrayBlock.params?.useCategory && !this.root) {
+            throw new IncorrectFormatError(`Block ${this.arrayField} uses category but no root was specified`, this.arrayBlock);
+        }
+
+        const root = this.arrayBlock.params?.useCategory ? this.root : this.arrayBlock.root;
+
+        this.formRoot = await this.formsService.getFormRoot(root);       
     }
 
     private async createFormArrayElt() {
         const formMutate = new FormMutateFacade(this.pid, {
             type: 'form',
             op: 'create',
-            root: this.root.id,
+            root: this.formRoot.id,
         });
 
         this.formElt = await formMutate.execute() as FormInstance;

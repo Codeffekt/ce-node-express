@@ -128,7 +128,7 @@ export class FormMutateFacade {
 
         this.checkIndices();
         this.checkArrayField();
-        const formArrayCreate = new FormArrayCreateFacade(this.pid, this.mutation.indices[0], this.mutation.formArrayField);
+        const formArrayCreate = new FormArrayCreateFacade(this.pid, this.mutation.indices[0], this.mutation.formArrayField, this.mutation.root);
         return formArrayCreate.execute(this.mutation.author);
     }
 
