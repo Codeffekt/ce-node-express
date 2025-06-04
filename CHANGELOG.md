@@ -1,3 +1,10 @@
+## [1.14.4] 
+ - use category
+ - add force and clear installation
+ - fix remote api service
+ - fix pg format
+ - reduce database coupling
+
 ## [1.14.3]
  - feat: add option in CeApiModule to disable the event client
 
