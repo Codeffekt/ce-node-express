@@ -72,22 +72,22 @@ export class FormUpgradeFacade {
 
     private mergeForms(root: FormInstanceBase, form: FormInstance) {
 
-        const rootCopy = Utils.deepcopy(root);
+        const newForm = FormUtils.createFormWithCore(root, undefined, undefined);
 
         form.title = root.title;
-        if (rootCopy.table) form.table = rootCopy.table;
-        if (rootCopy.params) form.params = rootCopy.params;
+        if (newForm.table) form.table = newForm.table;
+        if (newForm.params) form.params = newForm.params;
         form.content = {
-            ...rootCopy.content,
+            ...newForm.content,
             ...
             // updated blocks
-            Object.keys(rootCopy.content)
+            Object.keys(newForm.content)
                 .filter(field => form.content[field] !== undefined)
                 .reduce((prev, cur) => ({
                     ...prev,
                     [cur]: FormBlockMergeOperator.mergeBlocks(
                         form.content[cur],
-                        rootCopy.content[cur])
+                        newForm.content[cur])
                 }),
                     {})
         };

@@ -260,28 +260,12 @@ export class FormsService {
     }
 
     createForm(root: FormRoot, author?: IndexType): FormInstance {
-        return this.createFormWithCore(root, {
+        return FormUtils.createFormWithCore(root, {
             id: this.context.createUnique(),
             ctime: Date.now(),
         }, author);
     }
-
-    createFormWithCore(root: FormRoot, context: CoreIndexElt, author?: IndexType): FormInstance {
-        const newInstance = {
-            ...Utils.deepcopy(root),
-            valid: true,
-            ...context,
-            root: root.id,
-            author: author
-        };
-        for (const block of Object.values(newInstance.content)) {
-            if (!FormUtils.isDefined(block.value) && FormUtils.isDefined(block.defaultValue)) {
-                block.value = block.defaultValue;
-            }
-        }
-        return newInstance;
-    }
-
+    
     createFormFromEntity(entity: any, author?: IndexType): FormInstance {
         if (!entity._formBase) {
             throw new Error("Cannot create form instance, property _formBase missing");
