@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
+    "skipLibCheck": true,
     "sourceMap": true,
     "declaration": true,
     "downlevelIteration": true,

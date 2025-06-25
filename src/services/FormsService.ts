@@ -1,5 +1,4 @@
 import {
-    CoreIndexElt,
     DbArrayRes, EltNotFoundError,
     FormAssoc, FormBlock, FormInstance,
     FormInstanceExt, FormQuery,
