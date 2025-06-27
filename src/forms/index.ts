@@ -1,5 +1,6 @@
 export * from "./ForkFieldsUtils";
 export * from "./FormArrayCreateFacade";
+export * from "./FormArrayDeleteFacade";
 export * from "./FormAssocAdd";
 export * from "./FormAssocDelete";
 export * from "./FormCreateFacade";
