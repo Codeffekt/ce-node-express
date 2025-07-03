@@ -159,9 +159,8 @@ export class FormMutateFacade {
 
     private async executeFormAssocAdd() {
         this.checkIndices();
-        this.checkRefField();
-        const op = new FormAssocAdd();
-        return op.add(this.mutation.ref, this.mutation.indices, this.mutation.formArrayField);
+        this.checkRefField();        
+        return FormAssocAdd.add(this.mutation.ref, this.mutation.indices, this.mutation.formArrayField);
     }
 
     private async executeFormAssocDelete() {

@@ -1,18 +1,12 @@
 import { FormUtils, IndexType } from "@codeffekt/ce-core-data";
-import { Inject } from "../core/CeService";
+import { CeService } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 
-export class FormAssocAdd {
+export class FormAssocAdd {    
 
-    @Inject(FormsService)
-    private readonly formsService: FormsService;
-
-    constructor() {
-    }
-
-    async add(id: IndexType, indices: IndexType[], field?: string) {
+    static async add(id: IndexType, indices: IndexType[], field?: string) {
         const ref = FormUtils.createFormAssocRef(id, field);
-        const res = await this.formsService.insertFormsAssoc(
+        const res = await CeService.get(FormsService).insertFormsAssoc(
             indices.map(form => ({
                 form,
                 ref,
