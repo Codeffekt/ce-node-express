@@ -5,10 +5,10 @@ import {
   EltNotFoundError
 } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
-import { 
-  CeApiAccountId, CeApiAdmin, 
-  CeApiBinds, CeApiCall, 
-  CeApiComponent, CeApiRole 
+import {
+  CeApiAccountId, CeApiAdmin,
+  CeApiBinds, CeApiCall,
+  CeApiComponent, CeApiRole
 } from "../express-router/ApiModule";
 import { FormMutateFacade } from "../forms/FormMutateFacade";
 import { FormsService } from "../services/FormsService";
@@ -18,6 +18,7 @@ import { FormsRootService } from "../services/FormsRootService";
 import { FormCreateFromRootFacade } from "./FormCreateFromRootFacade";
 import { FormsQueryArrayFacade } from "./FormsQueryArrayFacade";
 import { FormPathQuery } from "./FormPathQuery";
+import { FormPath, FormSubFormsPaths, FormSubFormsPathsConfig } from "./FormSubformsPaths";
 
 @CeApiComponent()
 export class PublicForms {
@@ -33,7 +34,7 @@ export class PublicForms {
   @CeApiCall
   async getRoot(id: IndexType): Promise<FormRoot> {
     const root = await this.formsService.getFormRoot(id);
-    if(root === undefined) {
+    if (root === undefined) {
       throw new EltNotFoundError(`Root ${id} not found`, { root: id });
     }
     return root;
@@ -50,7 +51,7 @@ export class PublicForms {
   @CeApiBinds
   async copy(@CeApiAccountId id: IndexType, src: IndexType) {
     const creator = new FormCopyFacade();
-    return creator.copy(src, id);    
+    return creator.copy(src, id);
   }
 
   @CeApiCall
@@ -59,7 +60,7 @@ export class PublicForms {
   @CeApiBinds
   async create(@CeApiAccountId id: IndexType, root: IndexType, partialContent?: any) {
     return FormCreateFromRootFacade.fromPartialContent(root, id, partialContent);
-  }  
+  }
 
   @CeApiCall
   @CeApiRole(
@@ -67,7 +68,7 @@ export class PublicForms {
   @CeApiBinds
   update(@CeApiAccountId id: IndexType, elt: FormInstanceExt) {
     const updater = new FormUpdateFacade();
-    return updater.executeFromForm(elt, id);    
+    return updater.executeFromForm(elt, id);
   }
 
   @CeApiCall
@@ -76,7 +77,7 @@ export class PublicForms {
   @CeApiBinds
   async updateForms(@CeApiAccountId id: IndexType, elts: FormInstanceExt[]) {
     const updater = new FormUpdateFacade();
-    return updater.executeFromForms(elts, id);   
+    return updater.executeFromForms(elts, id);
   }
 
   @CeApiCall
@@ -85,7 +86,7 @@ export class PublicForms {
   @CeApiBinds
   async updateFormsFromAssoc(@CeApiAccountId id: IndexType, ref: IndexType, elts: FormInstance[]) {
     const updater = new FormUpdateFacade();
-    return updater.executeFromAssoc(elts, ref, id);   
+    return updater.executeFromAssoc(elts, ref, id);
   }
 
   @CeApiCall
@@ -106,7 +107,7 @@ export class PublicForms {
     ROLE_CREATE)
   deleteForm(id: IndexType): Promise<boolean> {
     return this.formsService.deleteForms([id]);
-  }  
+  }
 
   @CeApiCall
   getFormsFromAssoc(ref: IndexType, limit: number, offset: number): Promise<DbArrayRes<FormInstance>> {
@@ -114,7 +115,7 @@ export class PublicForms {
   }
 
   @CeApiCall
-  getFormsQuery(query: FormQuery) {    
+  getFormsQuery(query: FormQuery) {
     return this.formsService.getFormsQuery({ limit: 0, offset: 0, ...query });
   }
 
@@ -131,6 +132,16 @@ export class PublicForms {
   @CeApiCall
   async getFormQueryPath(id: IndexType, path: string): Promise<FormInstance> {
     return FormPathQuery.fromPath(id, path);
+  }
+
+  @CeApiCall
+  async getSubFormsPaths(config: FormSubFormsPathsConfig): Promise<FormPath[]> {
+    return FormSubFormsPaths.generate(config);
+  }
+
+  @CeApiCall
+  async deleteSubFormsPaths(config: FormSubFormsPathsConfig): Promise<boolean> {
+    return FormSubFormsPaths.delete(config);
   }
 
   @CeApiCall

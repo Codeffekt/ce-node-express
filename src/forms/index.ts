@@ -22,6 +22,7 @@ export * from './FormsQueryArrayFacade';
 export * from './FormsMessagesQueues';
 export * from './FormMessageBuilder';
 export * from './FormPathQuery';
+export * from './FormSubformsPaths';
 export * from "./PublicForms";
 export * from "./PublicFormsVersion";
 export * from "./PublicFormsRoot";

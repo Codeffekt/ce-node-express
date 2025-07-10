@@ -4,8 +4,7 @@ import {
     FormInstance, FormInstanceBase,
     FormUtils,
     FormWrapper,
-    IndexType, Utils
-} from "@codeffekt/ce-core-data";
+    IndexType } from "@codeffekt/ce-core-data";
 import { Inject } from "../core/CeService";
 import { FormsService } from "../services/FormsService";
 import { FormBlockMergeOperator } from "./blocks";
