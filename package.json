@@ -20,8 +20,8 @@
     "url": "https://codeffekt.com"
   },
   "license": "Apache-2.0",
-  "dependencies": {    
-    "@codeffekt/ce-core-data": "^1.2.6",
+  "dependencies": {
+    "@codeffekt/ce-core-data": "^1.2.7",
     "@codeffekt/quickthumb": "0.0.14",
     "amqplib": "^0.10.5",
     "axios": "^1.7.9",
